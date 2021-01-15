@@ -1,5 +1,29 @@
-# Repository template
+# Archipel Client for Python
 
-This repository serves as a template for all other Alpine Intuition repo's.
+## Installation
 
-#### Have you setup up the linter locally as explained in the [doc](https://github.com/alpineintuition/alpine-doc/blob/master/DEV_OPS.md#linting)?! If not, DO IT!
+### From pip
+
+TODO
+
+### From source
+
+```
+pip install --editable .
+```
+
+## Usage
+
+TODO
+
+## Examples
+
+```
+cd examples
+
+# Send one image
+python simple.py
+
+# Steam your webcam
+python webcam.py
+```
