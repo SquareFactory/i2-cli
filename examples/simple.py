@@ -1,15 +1,24 @@
+import argparse
 import time
 
 import cv2
 
 from archipel_client import ArchipelClient
 
-url = "ws://127.0.0.1:9001"
-access_uuid = "access:472f9457-072c-4a1a-800b-75ecdd6041e1"
-# TODO REMOVE
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--url", type=str, help="", required=True)
+parser.add_argument("--port", type=int, help="", required=True)
+parser.add_argument(
+    "--access_uuid",
+    type=str,
+    help="",
+    default="access:472f9457-072c-4a1a-800b-75ecdd6041e1",
+)
+args = parser.parse_args()
 
-archipel_client = ArchipelClient(url, access_uuid)
+url = f"ws://{args.url}:{args.port}"
+archipel_client = ArchipelClient(url, args.access_uuid)
 
 img = cv2.imread("test.jpg")
 if img is None:
