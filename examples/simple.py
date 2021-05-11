@@ -17,7 +17,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-url = f"ws://{args.url}:{args.port}"
+# url = f"wss://{args.url}:{args.port}"
+url = "wss://arch2.isquare.ai/pixelizer"
 archipel_client = ArchipelClient(url, args.access_uuid)
 
 img = cv2.imread("test.jpg")

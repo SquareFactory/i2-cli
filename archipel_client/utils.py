@@ -14,4 +14,4 @@ def binary_to_img(binary_img):
 def img_to_binary(img: np.ndarray) -> bytes:
     """Images to binary images."""
     _, binary_img = cv2.imencode(".jpg", img)
-    return base64.b64encode(binary_img.tobytes())
+    return base64.b64encode(binary_img)

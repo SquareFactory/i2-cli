@@ -32,7 +32,7 @@ class ArchipelClient:
 
         outputs = []
         for img in imgs:
-            binary_img = img_to_binary(img)
+            binary_img = img_to_binary(img).decode()
             extra_data = ""
             await self.websocket.send(msgpack.packb([binary_img, extra_data]))
             binary_outputs = await self.websocket.recv()
