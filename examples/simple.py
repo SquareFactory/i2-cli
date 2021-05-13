@@ -3,12 +3,11 @@ import time
 
 import cv2
 
-from archipel_client import ArchipelClient
+from archipel_client import ArchipelVisionClient
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--url", type=str, help="", required=True)
-parser.add_argument("--port", type=int, help="", required=True)
 parser.add_argument(
     "--access_uuid",
     type=str,
@@ -17,9 +16,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# url = f"wss://{args.url}:{args.port}"
-url = "wss://arch2.isquare.ai/pixelizer"
-archipel_client = ArchipelClient(url, args.access_uuid)
+archipel_client = ArchipelVisionClient(args.url, args.access_uuid)
 
 img = cv2.imread("test.jpg")
 if img is None:
