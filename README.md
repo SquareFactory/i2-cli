@@ -23,6 +23,6 @@ cd examples
 
 # Steam your webcam
 python webcam_stream.py \
-  --url wss://arch2.isquare.ai/pixelizer \
-  --access_uuid access:70000000-0000-0000-0000-00000000004i
+  --url wss://archipel-beta1.isquare.ai/43465956-8d6f-492f-ad45-91da69da44d0 \
+  --access_uuid access:48c1d60a-60fd-4643-90e4-cd0187b4fd9d
 ```
