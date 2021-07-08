@@ -29,11 +29,13 @@ async def main():
                 continue
             prev = time.time()
 
+            print("send...", end=" ")
+
             start = time.time()
             outputs = await ws.async_inference(frame)
             end = time.time()
 
-            print(f"duration: {end - start:.4f} secs (send + inference + receive)")
+            print(f"got! in {end - start:.4f} secs (send + inference + receive)")
 
             concatenate_imgs = np.concatenate((frame, outputs[0]), axis=1)
             cv2.imshow("original / inference ", concatenate_imgs)
