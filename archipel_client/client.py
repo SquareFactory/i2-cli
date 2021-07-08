@@ -71,7 +71,7 @@ class ArchipelVisionClient(ArchipelClient):
     """Vision Client."""
 
     def encode(self, img):
-        return img_to_binary(img)
+        return img_to_binary(img).decode()
 
     def decode(self, binary_img):
         return binary_to_img(binary_img.decode())
