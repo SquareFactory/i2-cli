@@ -1,1 +1,1 @@
-from .client import ArchipelVisionClient  # noqa
+from .client import ArchipelVisionClient, ArchipelDictsClient  # noqa

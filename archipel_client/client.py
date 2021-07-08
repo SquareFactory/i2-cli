@@ -1,5 +1,6 @@
 import asyncio
 
+import json
 import msgpack
 import websockets
 
@@ -28,24 +29,31 @@ class ArchipelClient:
     async def __aexit__(self, *args, **kwargs):
         await self._conn.__aexit__(*args, **kwargs)
 
-    def check_inputs(self, inputs):
+    def encode(self, inp):
         # To adapt depending the input and the output
         raise NotImplementedError
 
-    def check_outputs(self, outputs):
+    def decode(self, out):
         # To adapt depending the input and the output
         raise NotImplementedError
 
     async def async_inference(self, inputs):
-        inputs = self.check_inputs(inputs)
+        if not isinstance(inputs, list):
+            inputs = [inputs]
 
         outputs = []
-        for input in inputs:
+        for inp in inputs:
+            encoded_inp = self.encode(inp)
             extra_data = ""
-            await self.websocket.send(msgpack.packb([input, extra_data]))
-            output = await self.websocket.recv()
-            outputs.append(output)
-        outputs = self.check_outputs(outputs)
+
+            await self.websocket.send(msgpack.packb([encoded_inp, extra_data]))
+
+            out = await self.websocket.recv()
+
+            if isinstance(out, str):
+                outputs.append(out)
+            else:
+                outputs.append(self.decode(out))
 
         return outputs
 
@@ -62,12 +70,18 @@ class ArchipelClient:
 class ArchipelVisionClient(ArchipelClient):
     """Vision Client."""
 
-    def check_inputs(self, inputs):
-        if not isinstance(inputs, list):
-            inputs = [inputs]
-        return [img_to_binary(img).decode() for img in inputs]
+    def encode(self, img):
+        return img_to_binary(img)
 
-    def check_outputs(self, outputs):
-        outputs = [binary_to_img(output) for output in outputs]
-        # TODO adapt for other outputs
-        return outputs
+    def decode(self, binary_img):
+        return binary_to_img(binary_img.decode())
+
+
+class ArchipelDictsClient(ArchipelClient):
+    """Dictionnary Client."""
+
+    def encode(self, inp):
+        return json.dumps(inp)
+
+    def decode(self, inp):
+        return json.loads(inp)
