@@ -1,3 +1,12 @@
+"""Copyright (C) Alpine Intuition Sàrl - All Rights Reserved.
+
+This source code is protected under international copyright law. All rights
+reserved and protected by the copyright holders.
+This file is confidential and only available to authorized individuals with the
+permission of the copyright holders. If you encounter this file and do not have
+permission, please contact the copyright holders and delete this file.
+"""
+
 import argparse
 import asyncio
 import time
@@ -5,7 +14,7 @@ import time
 import cv2
 import numpy as np
 
-from archipel_client import ArchipelVisionClient
+from archipel_client import ArchipelClient
 
 
 parser = argparse.ArgumentParser()
@@ -16,10 +25,12 @@ args = parser.parse_args()
 
 
 async def main():
+    """Main async function."""
+
     cam = cv2.VideoCapture(0)
     prev = 0
 
-    async with ArchipelVisionClient(args.url, args.access_uuid) as ws:
+    async with ArchipelClient(args.url, args.access_uuid) as ws:
         while True:
             time_elapsed = time.time() - prev
             check, frame = cam.read()

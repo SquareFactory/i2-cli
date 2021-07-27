@@ -1,10 +1,19 @@
+"""Copyright (C) Alpine Intuition Sàrl - All Rights Reserved.
+
+This source code is protected under international copyright law. All rights
+reserved and protected by the copyright holders.
+This file is confidential and only available to authorized individuals with the
+permission of the copyright holders. If you encounter this file and do not have
+permission, please contact the copyright holders and delete this file.
+"""
+
 import argparse
 import asyncio
 
 import cv2
 from pathlib import Path
 
-from archipel_client import ArchipelVisionClient
+from archipel_client import ArchipelClient
 
 
 parser = argparse.ArgumentParser()
@@ -37,7 +46,9 @@ else:
 
 
 async def main():
-    async with ArchipelVisionClient(args.url, args.access_uuid) as client:
+    """Main async function."""
+
+    async with ArchipelClient(args.url, args.access_uuid) as client:
         # Start video reader
         cap = cv2.VideoCapture(str(path))
         if not cap.isOpened():

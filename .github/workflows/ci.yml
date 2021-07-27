@@ -1,0 +1,75 @@
+name: Continuous integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request: 
+    branches: [ master ]
+
+jobs:
+  check-code-formatting:
+    name: Check code formatting
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install Black & Flake8 & MyPy & Bandit
+        run: |
+          pip install \
+            bandit==1.6.2 \
+            black==20.8b1 \
+            flake8==3.8.3 \
+            flake8-docstrings==1.5.0 \
+            mypy==0.812
+
+      - name: Run Black
+        run: black --config=pyproject.toml --check .
+
+      - name: Run Flake8
+        run: flake8
+          --docstring-convention=google
+          --max-line-length=89
+          --max-complexity=18
+          --ignore=E203,E731,E402,E501,C901,W291,W503,D107,D102,D202,D205
+          .
+
+      - name: Run Bandit
+        run: bandit -s B101,B108,B301,B322,B403,B404,B601,B603,B607 .
+
+      - name: Run Mypy
+        run: mypy --ignore-missing-imports --allow-redefinition .
+
+  testing:
+    name: Testing
+    runs-on: self-hosted
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install archipel client
+        run: pip3 install -e .
+        shell: bash
+
+      - name: Run pytest
+        run: python -m pytest --cov=archipel_client --cov-report term-missing --disable-warnings .
+
+      - name: Code coverage
+        if: success()
+        run: |
+          MIN_COVERAGE="90.00"
+
+          coverage report
+
+          CODECOV=$(coverage report | grep TOTAL)
+          CODECOV=$(echo ${CODECOV##* } | sed 's/.$//')
+
+          if [ $(echo $CODECOV'>='$MIN_COVERAGE | bc -l) -eq 0 ]; then
+            echo "Not enough code coverage ($CODECOV% < $MIN_COVERAGE%)"
+            exit 1
+          fi
