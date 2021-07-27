@@ -11,6 +11,7 @@ import argparse
 import time
 
 import cv2
+import numpy as np
 
 from archipel_client import ArchipelClient
 
@@ -32,13 +33,15 @@ if img is None:
     raise FileNotFoundError("invalid image")
 
 start = time.time()
-output = archipel_client.inference(img)[0]
+outputs = archipel_client.inference(img)
 end = time.time()
 
-print(f"duration: {end - start:.4f} ms (open connection + send + inference + receive)")
+print(
+    f"duration: {end - start:.4f} secs (open connection + send + inference + receive)"
+)
 print("press on any key to quit...")
 
-cv2.imshow("original", img)
-cv2.imshow("inference", output)
+concatenate_imgs = np.concatenate((img, outputs[0]), axis=1)
+cv2.imshow("original / inference ", concatenate_imgs)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
