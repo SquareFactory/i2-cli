@@ -17,6 +17,9 @@ exclude = '''
 )/
 '''
 
+[tool.isort]
+profile = "black"
+
 [tool.coverage.report]
 exclude_lines = ['if __name__ == .__main__.:']
 precision = 2

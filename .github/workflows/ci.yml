@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install archipel client
-        run: pip3 install -e .
+        run: pip3 install --user .
         shell: bash
 
       - name: Run pytest

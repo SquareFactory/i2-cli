@@ -8,11 +8,11 @@ permission, please contact the copyright holders and delete this file.
 """
 
 import asyncio
-from contextlib import closing
 import socket
+from contextlib import closing
 
-import numpy as np
 import msgpack
+import numpy as np
 import pytest
 import websockets
 
@@ -22,53 +22,6 @@ from archipel_client import ArchipelClient
 def test_init():
     """Test archipel client initialization."""
     ArchipelClient("", "")
-
-
-def test_serialize_deserialize_np_array(mocker):
-    """Test np serialization deserialization function."""
-
-    client = ArchipelClient("", "")
-    fake_data = np.random.randint(0, 255, (600, 600, 3))
-
-    serialized = client._serialize_np_array(fake_data)
-    deserialized = client._deserialize_np_array(serialized)
-    assert np.equal(fake_data, deserialized).all()
-
-    mocker.patch("cv2.imencode", return_value=(False, None))
-    with pytest.raises(ValueError):
-        client._serialize_np_array(fake_data)
-
-    mocker.patch("cv2.imdecode", return_value=None)
-    with pytest.raises(ValueError):
-        client._deserialize_np_array(serialized)
-
-
-@pytest.mark.parametrize(
-    "data",
-    [{"status": "success", "data": "zbl"}, {"status": "fail", "message": "zbl"}],
-)
-def test_valid_received_msg(data):
-    """Test decoded message function."""
-    client = ArchipelClient("", "")
-    decoded_msg = client._get_decoded_msg(msgpack.packb(data))
-    assert data == decoded_msg
-
-
-@pytest.mark.parametrize(
-    "msg",
-    [
-        "zbl",
-        b"zbl",
-        msgpack.packb({"zbl": "zbl"}),
-        msgpack.packb({"status": "success"}),
-        msgpack.packb({"status": "fail"}),
-    ],
-)
-def test_invalid_received_msg(msg):
-    """Test np serialization deserialization function."""
-    client = ArchipelClient("", "")
-    with pytest.raises(ValueError):
-        client._get_decoded_msg(msg)
 
 
 def get_available_port() -> int:
@@ -190,6 +143,111 @@ async def test_archipel_client_connection_async_fail_msgpack(setup):
             "output_type": "None",
         }
         await websocket.send(msgpack.packb({"status": "success", "data": data}))
+
+    start_server = websockets.serve(fake_cld, host, port)
+
+    try:
+        gather = asyncio.gather(fake_user(), start_server)
+        await asyncio.wait_for(gather, timeout=5.0)
+
+    finally:
+        await close_all_tasks()
+
+
+@pytest.mark.asyncio
+async def test_archipel_client_connection_async_fail_to_encode(setup):
+    """Test full connection and inference pipeline."""
+
+    url, host, port = setup
+
+    def raise_error(*args, **kwargs):
+        raise TypeError()
+
+    async def fake_user():
+        await asyncio.sleep(0.1)
+        with pytest.raises(ValueError):
+            async with ArchipelClient(url, "good:access_key") as client:
+                fake_data = np.random.randint(0, 255, (250, 250, 3))
+                await client.async_inference(fake_data, encode=raise_error)
+
+    async def fake_cld(websocket, path):
+        await websocket.recv()
+        data = {
+            "input_type": "zbl",
+            "input_size": "variable",
+            "output_type": "None",
+        }
+        await websocket.send(msgpack.packb({"status": "success", "data": data}))
+
+    start_server = websockets.serve(fake_cld, host, port)
+
+    try:
+        gather = asyncio.gather(fake_user(), start_server)
+        await asyncio.wait_for(gather, timeout=5.0)
+
+    finally:
+        await close_all_tasks()
+
+
+@pytest.mark.asyncio
+async def test_archipel_client_connection_async_got_invalid_message(setup):
+    """Test full connection and inference pipeline."""
+
+    url, host, port = setup
+
+    async def fake_user():
+        await asyncio.sleep(0.1)
+        with pytest.raises(RuntimeError):
+            async with ArchipelClient(url, "good:access_key") as client:
+                await client.async_inference("zbl")
+
+    async def fake_cld(websocket, path):
+        await websocket.recv()
+        data = {
+            "input_type": "None",
+            "input_size": "variable",
+            "output_type": "None",
+        }
+        await websocket.send(msgpack.packb({"status": "success", "data": data}))
+
+        await websocket.recv()
+        await websocket.send(msgpack.packb({"zbl": "success"}))
+
+    start_server = websockets.serve(fake_cld, host, port)
+
+    try:
+        gather = asyncio.gather(fake_user(), start_server)
+        await asyncio.wait_for(gather, timeout=5.0)
+
+    finally:
+        await close_all_tasks()
+
+
+@pytest.mark.asyncio
+async def test_archipel_client_connection_async_got_inference_fail(setup, mocker):
+    """Test full connection and inference pipeline."""
+
+    url, host, port = setup
+
+    fake_msg = "zbl"
+
+    async def fake_user():
+        await asyncio.sleep(0.1)
+        async with ArchipelClient(url, "good:access_key") as client:
+            outputs = await client.async_inference("coucou")
+            assert outputs[0] == fake_msg
+
+    async def fake_cld(websocket, path):
+        await websocket.recv()
+        data = {
+            "input_type": "None",
+            "input_size": "variable",
+            "output_type": "None",
+        }
+        await websocket.send(msgpack.packb({"status": "success", "data": data}))
+
+        await websocket.recv()
+        await websocket.send(msgpack.packb({"status": "fail", "message": fake_msg}))
 
     start_server = websockets.serve(fake_cld, host, port)
 

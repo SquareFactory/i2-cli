@@ -1,18 +1,41 @@
 repos:
+  - repo: https://github.com/pycqa/isort
+    rev: 5.8.0
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+
   - repo: https://github.com/psf/black
-    rev: 19.10b0
+    rev: 21.5b0
     hooks:
       - id: black
-        language_version: python3.8
+        language_version: python3
+        args: [
+          --config, "pyproject.toml"
+        ]
+
+  - repo: https://github.com/myint/autoflake
+    rev: v1.4
+    hooks:
+      - id: autoflake
+        args:
+          [
+            "--in-place",
+            "--remove-all-unused-imports",
+            "--ignore-init-module-imports",
+            "--remove-unused-variables",
+          ]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.0.0
     hooks:
       - id: flake8
+        additional_dependencies: [flake8-docstrings]
         args: [
-            --ignore, "E203,E501,W291,W503",
-            --max-line-length, "89",
-            --max-complexity, "18"
+            --ignore, "E203,E501,W291,W503,C901,D107,D102,D202,D205,D403",
+            --max-line-length, "89", 
+            --max-complexity, "18",
+            --docstring-convention, "google",
         ]
 
   - repo: https://github.com/PyCQA/bandit
@@ -21,4 +44,10 @@ repos:
     - id: bandit
       args:
       - -s
-      - B101,B108,B322,B404,B603
+      - B101,B108,B301,B322,B403,B404,B601,B603,B607
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.812
+    hooks:
+    - id: mypy
+      args: [--ignore-missing-imports, --allow-redefinition]

@@ -8,14 +8,11 @@ permission, please contact the copyright holders and delete this file.
 """
 
 import asyncio
-import base64
 import logging
 
-import cv2
+import archipel_utils as utils
 import msgpack
-import numpy as np
 import websockets
-
 
 log = logging.getLogger(__name__)
 
@@ -33,10 +30,10 @@ class ArchipelClient:
         self.websocket = None
 
         encode_functions = {
-            "numpy.ndarray": self._serialize_np_array,
+            "numpy.ndarray": utils.serialize_img,
         }
         decode_functions = {
-            "numpy.ndarray": self._deserialize_np_array,
+            "numpy.ndarray": utils.deserialize_img,
         }
         self.available_transforms = {
             "encode": encode_functions,
@@ -90,47 +87,6 @@ class ArchipelClient:
         """Async context manager exit."""
         await self._conn.__aexit__(*args, **kwargs)
 
-    def _serialize_np_array(self, array: np.ndarray) -> bytes:
-        """Serialize a numpy array into bytes."""
-        success, encoded_array = cv2.imencode(".png", array)
-        if not success:
-            raise ValueError("Fail to encode array")
-        return base64.b64encode(encoded_array)
-
-    def _deserialize_np_array(self, serialized_array: bytes) -> np.ndarray:
-        """Serialize a bytes variable into numpy array."""
-        decoded_array = base64.b64decode(serialized_array)
-        decoded_array = np.frombuffer(decoded_array, np.uint8)
-        decoded_array = cv2.imdecode(decoded_array, cv2.IMREAD_UNCHANGED)
-        if decoded_array is None:
-            raise ValueError("Fail to decode serialized array")
-        return decoded_array
-
-    def _get_decoded_msg(self, msg: bytes) -> dict:
-        """Decode websocket message and check mandatory keys."""
-        try:
-            decoded_msg = msgpack.unpackb(msg)
-        except TypeError:
-            raise ValueError(
-                f"Invalid message received, must be <class 'bytes'>, got {type(msg)}"
-            )
-        except msgpack.exceptions.ExtraData:
-            raise ValueError("Invalid message received, must be msgpacked")
-
-        if "status" not in decoded_msg:
-            raise ValueError("Invalid message received, missing 'status' key")
-
-        if decoded_msg["status"] == "success" and "data" not in decoded_msg:
-            raise ValueError(
-                "Invalid received message: when success, a 'data' key is needed"
-            )
-        if decoded_msg["status"] != "success" and "message" not in decoded_msg:
-            raise ValueError(
-                "Invalid received message: when not success, a 'message' key is needed"
-            )
-
-        return decoded_msg
-
     async def async_inference(self, inputs, encode=None, decode=None):
         """Send inference to archipel in async way."""
         if not isinstance(inputs, list):
@@ -157,7 +113,9 @@ class ArchipelClient:
             await self.websocket.send(msg)
 
             msg = await self.websocket.recv()
-            decoded_msg = self._get_decoded_msg(msg)
+            success, error_msg, decoded_msg = utils.get_decoded_msg(msg, {"status"})
+            if not success:
+                raise RuntimeError(error_msg)
 
             if decoded_msg["status"] == "success":
                 inference = decoded_msg["data"]
