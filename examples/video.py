@@ -9,12 +9,11 @@ permission, please contact the copyright holders and delete this file.
 
 import argparse
 import asyncio
-
-import cv2
 from pathlib import Path
 
-from archipel_client import ArchipelClient
+import cv2
 
+from i2_client import I2Client
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--url", type=str, help="", required=True)
@@ -48,7 +47,7 @@ else:
 async def main():
     """Main async function."""
 
-    async with ArchipelClient(args.url, args.access_uuid) as client:
+    async with I2Client(args.url, args.access_uuid) as client:
         # Start video reader
         cap = cv2.VideoCapture(str(path))
         if not cap.isOpened():

@@ -17,7 +17,7 @@ import websockets
 log = logging.getLogger(__name__)
 
 
-class ArchipelClient:
+class I2Client:
     """A class to manage the connection to a worker."""
 
     def __init__(self, url: str, access_key: str, debug: bool = True):

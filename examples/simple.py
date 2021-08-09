@@ -13,8 +13,7 @@ import time
 import cv2
 import numpy as np
 
-from archipel_client import ArchipelClient
-
+from i2_client import I2Client
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--url", type=str, help="", required=True)
@@ -26,14 +25,14 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-archipel_client = ArchipelClient(args.url, args.access_uuid)
+i2_client = I2Client(args.url, args.access_uuid)
 
 img = cv2.imread("test.jpg")
 if img is None:
     raise FileNotFoundError("invalid image")
 
 start = time.time()
-outputs = archipel_client.inference(img)
+outputs = i2_client.inference(img)
 end = time.time()
 
 print(

@@ -14,8 +14,7 @@ import time
 import cv2
 import numpy as np
 
-from archipel_client import ArchipelClient
-
+from i2_client import I2Client
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--url", type=str, help="", required=True)
@@ -30,7 +29,7 @@ async def main():
     cam = cv2.VideoCapture(0)
     prev = 0
 
-    async with ArchipelClient(args.url, args.access_uuid) as ws:
+    async with I2Client(args.url, args.access_uuid) as client:
         while True:
             time_elapsed = time.time() - prev
             check, frame = cam.read()
@@ -43,7 +42,7 @@ async def main():
             print("send...", end=" ")
 
             start = time.time()
-            outputs = await ws.async_inference(frame)
+            outputs = await client.async_inference(frame)
             end = time.time()
 
             print(f"got! in {end - start:.4f} secs (send + inference + receive)")

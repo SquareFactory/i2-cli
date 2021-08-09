@@ -17,6 +17,9 @@ jobs:
         with:
           python-version: 3.8
 
+      - name: Install i2-client
+        run: pip install --editable .
+
       - name: Install Black & Flake8 & MyPy & Bandit
         run: |
           pip install \
@@ -57,7 +60,7 @@ jobs:
         shell: bash
 
       - name: Run pytest
-        run: python -m pytest --cov=archipel_client --cov-report term-missing --disable-warnings .
+        run: python -m pytest --cov=i2_client --cov-report term-missing --disable-warnings .
 
       - name: Code coverage
         if: success()

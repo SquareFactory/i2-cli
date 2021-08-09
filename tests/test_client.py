@@ -16,12 +16,12 @@ import numpy as np
 import pytest
 import websockets
 
-from archipel_client import ArchipelClient
+from i2_client import I2Client
 
 
 def test_init():
     """Test archipel client initialization."""
-    ArchipelClient("", "")
+    I2Client("", "")
 
 
 def get_available_port() -> int:
@@ -61,7 +61,7 @@ async def test_archipel_client_connection_async_success(setup):
 
     async def fake_user():
         await asyncio.sleep(0.1)
-        async with ArchipelClient(url, "good:access_key") as client:
+        async with I2Client(url, "good:access_key") as client:
             inference = await client.async_inference(fake_data)
             assert np.equal(inference, fake_data).all()
 
@@ -103,7 +103,7 @@ async def test_client_connect_async_invalid_access(setup):
     async def fake_user():
         await asyncio.sleep(0.1)
         with pytest.raises(ConnectionError):
-            async with ArchipelClient(url, "wrong:access_key"):
+            async with I2Client(url, "wrong:access_key"):
                 pass
 
     async def fake_cld(websocket, path):
@@ -131,7 +131,7 @@ async def test_archipel_client_connection_async_fail_msgpack(setup):
     async def fake_user():
         await asyncio.sleep(0.1)
         with pytest.raises(ValueError):
-            async with ArchipelClient(url, "good:access_key") as client:
+            async with I2Client(url, "good:access_key") as client:
                 fake_data = np.random.randint(0, 255, (250, 250, 3))
                 await client.async_inference(fake_data)
 
@@ -166,7 +166,7 @@ async def test_archipel_client_connection_async_fail_to_encode(setup):
     async def fake_user():
         await asyncio.sleep(0.1)
         with pytest.raises(ValueError):
-            async with ArchipelClient(url, "good:access_key") as client:
+            async with I2Client(url, "good:access_key") as client:
                 fake_data = np.random.randint(0, 255, (250, 250, 3))
                 await client.async_inference(fake_data, encode=raise_error)
 
@@ -198,7 +198,7 @@ async def test_archipel_client_connection_async_got_invalid_message(setup):
     async def fake_user():
         await asyncio.sleep(0.1)
         with pytest.raises(RuntimeError):
-            async with ArchipelClient(url, "good:access_key") as client:
+            async with I2Client(url, "good:access_key") as client:
                 await client.async_inference("zbl")
 
     async def fake_cld(websocket, path):
@@ -233,7 +233,7 @@ async def test_archipel_client_connection_async_got_inference_fail(setup, mocker
 
     async def fake_user():
         await asyncio.sleep(0.1)
-        async with ArchipelClient(url, "good:access_key") as client:
+        async with I2Client(url, "good:access_key") as client:
             outputs = await client.async_inference("coucou")
             assert outputs[0] == fake_msg
 

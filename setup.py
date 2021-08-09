@@ -13,12 +13,17 @@ setup(
     name="archipel_client",
     version="0.0.1",
     install_requires=[
-        "archipel-utils",
-        "msgpack==1.0.0",
-        "numpy==1.19.4",
-        "opencv-python==4.5.1.48",
-        "websockets==8.1",
+        "archipel-utils>=0.1",
+        "click>=8.0" "docker>=4.4",
+        "msgpack>=1.0",
+        "numpy>=1.19",
+        "opencv-python>=4.5",
+        "websockets>=8.1",
     ],
     packages=find_packages(),
+    entry_points="""
+        [console_scripts]
+        i2=i2_client:cli
+    """,
     python_requires=">=3.8",
 )
