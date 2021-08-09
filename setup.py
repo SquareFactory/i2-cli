@@ -14,7 +14,8 @@ setup(
     version="0.0.1",
     install_requires=[
         "archipel-utils>=0.1",
-        "click>=8.0" "docker>=4.4",
+        "click>=8.0",
+        "docker>=4.4",
         "msgpack>=1.0",
         "numpy>=1.19",
         "opencv-python>=4.5",
