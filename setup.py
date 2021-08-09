@@ -11,7 +11,7 @@ import re
 
 from setuptools import find_packages, setup
 
-with open("archipel/__init__.py") as f:
+with open("i2_client/__init__.py") as f:
     version = re.search(r"\d.\d.\d", f.read()).group(0)  # type: ignore
 
 
@@ -19,7 +19,7 @@ setup(
     name="archipel_client",
     version=version,
     install_requires=[
-        "archipel-utils>=0.1",
+        "archipel-utils>=0.1.2",
         "click>=8.0",
         "docker>=4.4",
         "msgpack>=1.0",
