@@ -7,11 +7,17 @@ permission of the copyright holders. If you encounter this file and do not have
 permission, please contact the copyright holders and delete this file.
 """
 
+import re
+
 from setuptools import find_packages, setup
+
+with open("archipel/__init__.py") as f:
+    version = re.search(r"\d.\d.\d", f.read()).group(0)  # type: ignore
+
 
 setup(
     name="archipel_client",
-    version="0.0.1",
+    version=version,
     install_requires=[
         "archipel-utils>=0.1",
         "click>=8.0",
