@@ -16,7 +16,7 @@ with open("i2_client/__init__.py") as f:
 
 
 setup(
-    name="archipel_client",
+    name="i2_client",
     version=version,
     install_requires=[
         "archipel-utils>=0.1.2",
