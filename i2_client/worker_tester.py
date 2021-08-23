@@ -33,7 +33,6 @@ class BuildTestManager:
 
     def build_docker_img(
         self,
-        path: Union[Path, str],
         tag: str,
         additional_args: dict = {},
     ):
@@ -42,7 +41,7 @@ class BuildTestManager:
         log.debug(f"Building log for '{tag}'")
 
         try:
-            generator = client.build(path=str(path), tag=tag, **additional_args)
+            generator = client.build(path=str(Path.cwd()), tag=tag, **additional_args)
             output = generator.__next__()
         except docker.errors.APIError as error:
             raise docker.errors.BuildError(reason=error.explanation, build_log=error)
@@ -70,10 +69,12 @@ class BuildTestManager:
 
                 if "stream" in output:
                     stream = re.sub(r" +", " ", output["stream"].strip())
-                    if "Step" in stream and stream != "":
+                    if stream != "":
                         log.debug(stream)
-                        logs.append(stream)
-                        pbar.update()
+                        if "Step" in stream:
+                            log.debug(stream)
+                            logs.append(stream)
+                            pbar.update()
                 elif "errorDetail" in output:  # pragma: no cover
                     # print last message showing the error
                     for log_ in logs:
@@ -121,6 +122,9 @@ class BuildTestManager:
 
         log.info("Docker image creation")
 
+        cwd = Path.cwd()
+        log.info(f"Build context: {cwd}")
+
         # Check if a dockerfile is given or available (base name 'Dockerfile'). If not
         # use the archipe base one (depending on device detected before). In both case,
         # we use a temporary file to store dockerfile content in order to add our needed
@@ -132,11 +136,15 @@ class BuildTestManager:
                 with open(dockerfile, "r") as f:
                     content = f.read()
             else:
-                log.info(f"No Dockerfile in '{script.parent}', use base image")
+                log.info("No Dockerfile in direct build context, use base image")
                 img = "alpineintuition/archipel-base-cpu"
                 content = f"FROM {img}\n"
         else:
             dockerfile = Path(dockerfile)
+            if str(cwd) not in str(dockerfile.resolve()):
+                raise ValueError(
+                    f"Provided Dockerfile is not in the build context ({cwd})"
+                )
             if not dockerfile.is_file():
                 raise FileNotFoundError(f"Invalid file provided: {dockerfile}")
             with open(dockerfile, "r") as f:
@@ -160,9 +168,7 @@ class BuildTestManager:
         docker_tag = f"alpineintuion/archipel-task-{task}:latest"
         additional_args = {"dockerfile": tmp_dockerfile_path, "nocache": no_cache}
         try:
-            docker_img_hash = self.build_docker_img(
-                script.parent, docker_tag, additional_args
-            )
+            docker_img_hash = self.build_docker_img(docker_tag, additional_args)
         finally:
             # if build failed, be sure temp file is close and removed
             tmp_dockerfile.close()
@@ -188,26 +194,30 @@ class BuildTestManager:
         task_class_name = task_class_names[0].split("=")[-1].strip()
         return re.sub("[^A-Za-z0-9_]+", "", task_class_name)
 
-    def test_worker(self, container_name, task_class_name):
+    def test_worker(self, img_name, worker_class):
         """Test the forward pass of a built worker."""
 
         log.info("Testing the worker")
+
         try:
-            err = self.client.containers.run(
-                container_name,
-                f"python -c 'from worker_script import {task_class_name}; {task_class_name}().unit_testing()'",
-                stderr=True,
+            cmd = (
+                f"python -c 'from worker_script import {worker_class}; "
+                + f"{worker_class}().unit_testing()'"
             )
+            error = self.client.containers.run(img_name, cmd, stderr=True)
+
         except docker.errors.APIError:
             raise RuntimeError("Error while reaching docker")
-        except docker.errors.ContainerError:
-            log.info("There was a problem during the tests:")
+
+        except docker.errors.ContainerError as error:
+            log.error(f"There was a problem during the tests: \n{error}")
             return False
-        if err == b"":
+
+        if error == b"":
             log.info("Worker test successful!")
             return True
         else:
-            log.info("There was a problem during the tests: \n", err)
+            log.error(f"There was a problem during the tests, logs: \n{error.decode()}")
             return False
 
     def verify_worker(
