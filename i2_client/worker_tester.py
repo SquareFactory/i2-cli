@@ -116,7 +116,7 @@ class BuildTestManager:
 
         log.info(f"Building task '{task}'...")
 
-        task_class_name = self.get_task_class_name(script)
+        task_class_name = self.get_worker_class_name(script)
 
         # Build docker img
 
@@ -177,22 +177,23 @@ class BuildTestManager:
 
         return task, docker_img_hash, task_class_name
 
-    def get_task_class_name(self, script):
-        """Get the task class name."""
+    def get_worker_class_name(self, script):
+        """Get the worker class name.
 
-        # Verify script & get class name. We cannot import the file since it can
-        # contains unknow packages for the host system so we have to parse the file.
+        Verify script & get class name. We cannot import the file since it can
+        contains unknow packages for the host system so we have to parse the file.
+        """
 
         with open(script, "r") as f:
             field = "__task_class_name__"
-            task_class_names = [li for li in f.readlines() if field in li]
-            if len(task_class_names) == 0:
+            worker_class_names = [li for li in f.readlines() if field in li]
+            if len(worker_class_names) == 0:
                 raise AttributeError(f"There is no '{field}' defined into {script}")
-            if len(task_class_names) > 1:
+            if len(worker_class_names) > 1:
                 raise AttributeError(f"Multiple definitions of '{field}' into {script}")
 
-        task_class_name = task_class_names[0].split("=")[-1].strip()
-        return re.sub("[^A-Za-z0-9_]+", "", task_class_name)
+        worker_class_name = worker_class_names[0].split("=")[-1].strip()
+        return re.sub("[^A-Za-z0-9_]+", "", worker_class_name)
 
     def test_worker(self, img_name, worker_class):
         """Test the forward pass of a built worker."""
@@ -206,8 +207,8 @@ class BuildTestManager:
             )
             error = self.client.containers.run(img_name, cmd, stderr=True)
 
-        except docker.errors.APIError:
-            raise RuntimeError("Error while reaching docker")
+        except docker.errors.APIError as error:
+            raise RuntimeError(f"Error while reaching docker: {error}")
 
         except docker.errors.ContainerError as error:
             log.error(f"There was a problem during the tests: \n{error}")
