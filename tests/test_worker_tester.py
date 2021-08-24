@@ -9,6 +9,7 @@ permission, please contact the copyright holders and delete this file.
 
 import os
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import docker
 import pytest
@@ -16,6 +17,7 @@ import pytest
 from i2_client.worker_tester import BuildTestManager
 
 mirror = Path("examples/tasks/mirror.py")
+docker_img = "alpineintuion/archipel-task-mirror:latest"
 client = docker.from_env()
 
 
@@ -60,7 +62,7 @@ def test_build_task(mocker):
             for tag in img.tags:
                 if "archipel" in tag or "redis" in tag:
                     archipel_imgs.append(tag)
-        assert "alpineintuion/archipel-task-mirror:latest" in archipel_imgs
+        assert docker_img in archipel_imgs
 
         print("script do not exist")
         with pytest.raises(FileNotFoundError):
@@ -74,6 +76,78 @@ def test_build_task(mocker):
         #  mocker.patch("pathlib.Path.is_file", return_value=False)
         with pytest.raises(ValueError):
             BuildTestManager().build_task(mirror.name, dockerfile="../zbl")
+
+
+def test_get_worker_classs_name():
+    """Test get worker class name.
+
+    Tested:
+        - field not present
+        - multiple fields
+        - sanitize inputs
+    """
+
+    bm = BuildTestManager()
+
+    print("No valid field into file")
+    with NamedTemporaryFile() as tmp_file:
+        tmp_file.write(b"no field")
+        tmp_file.seek(0)
+        with pytest.raises(AttributeError):
+            bm.get_worker_class_name(tmp_file.name)
+
+    print("Multiple definitions")
+    with NamedTemporaryFile() as tmp_file:
+        tmp_file.write(b"__task_class_name__ = 'zbl'\n")
+        tmp_file.write(b"__task_class_name__ = 'zbl'\n")
+        tmp_file.seek(0)
+        with pytest.raises(AttributeError):
+            bm.get_worker_class_name(tmp_file.name)
+
+    print("Sanize inputs")
+    with NamedTemporaryFile() as tmp_file:
+        tmp_file.write(b"__task_class_name__ = 'zbl_.;l'\n")
+        tmp_file.seek(0)
+        worker_class = bm.get_worker_class_name(tmp_file.name)
+        assert worker_class == "zbl_l"
+
+
+def test_test_worker(mocker):
+    """Test test worker function.
+
+    Tested:
+        - docker image not built
+        - error during unit testing start
+        - unit test successful
+        - unit test not successful
+    """
+
+    btm = BuildTestManager()
+
+    print("Image do not exist")
+    with pytest.raises(RuntimeError):
+        btm.test_worker("zbl", "zbl")
+        assert False
+
+    print("Error during unit testing")
+    func = "docker.models.containers.ContainerCollection.run"
+
+    def raise_error(*args, **kargs):
+        raise docker.errors.ContainerError("", "", "", "", "")
+
+    mocker.patch(func, side_effect=raise_error)
+    success = btm.test_worker("zbl", "zbl")
+    assert not success
+
+    print("Worker test successful")
+    mocker.patch(func, return_value=b"")
+    success = btm.test_worker("zbl", "zbl")
+    assert success
+
+    print("Worker test fail")
+    mocker.patch(func, return_value=b"error")
+    success = btm.test_worker("zbl", "zbl")
+    assert not success
 
 
 def test_verify_worker(mocker):
