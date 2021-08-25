@@ -29,12 +29,16 @@ You should see following output:
 14:51:29 - INFO - Building task 'mirror'...
 14:51:29 - INFO - Docker image creation
 14:51:29 - INFO - No Dockerfile in 'examples/tasks', use base image
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 10485.76 steps/s]14:51:31 - INFO - Task 'mirror' successfully built!
+100%|█████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 10485.76 steps/s]
+14:51:31 - INFO - Task 'mirror' successfully built!
 14:51:31 - INFO - Testing the worker
 14:51:32 - INFO - Worker test successful!
 ```
 
 Indicating that the test was successfull.
+
+> **TIPS**: You can add build argument, like in docker, with the argument `--build-args`. You 
+can use it multiple times to add multiples argument. Example: `--build-args ENV=VALUE`
 
 ## Integrate on code
 
