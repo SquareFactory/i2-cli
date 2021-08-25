@@ -101,6 +101,7 @@ class BuildTestManager:
         dockerfile: Optional[Union[str, Path]] = None,
         cpu: bool = False,
         no_cache: bool = False,
+        build_args: str = None,
     ):
 
         script = Path(script).resolve()
@@ -166,7 +167,20 @@ class BuildTestManager:
         tmp_dockerfile.seek(0)
 
         docker_tag = f"alpineintuion/archipel-task-{task}:latest"
+
         additional_args = {"dockerfile": tmp_dockerfile_path, "nocache": no_cache}
+        if build_args is not None:
+            buildargs = {}
+            for index, build_arg in enumerate(build_args):
+                splitted_build_arg = build_arg.split("=")
+                if len(splitted_build_arg) != 2:
+                    raise ValueError(
+                        f"Invalid format for build args {index}. "
+                        + f"Need to look like 'ARGUMENT=VALUE'. Got: {build_arg}"
+                    )
+                buildargs[splitted_build_arg[0]] = splitted_build_arg[1]
+            additional_args["buildargs"] = buildargs
+
         try:
             docker_img_hash = self.build_docker_img(docker_tag, additional_args)
         finally:
@@ -228,9 +242,10 @@ class BuildTestManager:
         dockerfile: Optional[Union[str, Path]] = None,
         cpu: bool = False,
         no_cache: bool = False,
+        build_args: str = None,
     ):
 
         _, cont_name, class_name = self.build_task(
-            script, task_name, dockerfile, cpu, no_cache
+            script, task_name, dockerfile, cpu, no_cache, build_args
         )
         return self.test_worker(cont_name, class_name)

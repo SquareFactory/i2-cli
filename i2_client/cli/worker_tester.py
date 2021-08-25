@@ -30,8 +30,17 @@ def test(ctx: Context):
 @click.option("--task_name", type=str, default=None)
 @click.option("--cpu", is_flag=True, help="Force only CPU mode")
 @click.option("--no-cache", is_flag=True, help="Do not use cached files for build")
-def worker(ctx: Context, task_script: str, task_name, dockerfile, cpu, no_cache):
+@click.option(
+    "--build-args",
+    type=str,
+    default=None,
+    multiple=True,
+    help="Set build-time variables, like in docker",
+)
+def worker(
+    ctx: Context, task_script: str, task_name, dockerfile, cpu, no_cache, build_args
+):
     """Test the build and logic of a worker before deploying on archipel."""
     ctx.obj["BUILD_TEST_MANAGER"].verify_worker(
-        task_script, task_name, dockerfile, cpu, no_cache
+        task_script, task_name, dockerfile, cpu, no_cache, build_args
     )

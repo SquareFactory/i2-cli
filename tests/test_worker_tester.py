@@ -53,7 +53,8 @@ def test_build_task(mocker):
     """
 
     with cd(mirror.parent):
-        BuildTestManager().build_task(mirror.name, cpu=True)
+        args = ("VAR=VALUE",)
+        BuildTestManager().build_task(mirror.name, cpu=True, build_args=args)
 
         archipel_imgs = []
         for img in client.images.list():
@@ -76,6 +77,11 @@ def test_build_task(mocker):
         #  mocker.patch("pathlib.Path.is_file", return_value=False)
         with pytest.raises(ValueError):
             BuildTestManager().build_task(mirror.name, dockerfile="../zbl")
+
+        print("invalid buildargs")
+        with pytest.raises(ValueError):
+            args = ("VALUE TEST",)
+            BuildTestManager().build_task(mirror.name, cpu=True, build_args=args)
 
 
 def test_get_worker_classs_name():

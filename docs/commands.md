@@ -64,6 +64,7 @@ Options:
   --task_name TEXT
   --cpu              Force only CPU mode
   --no-cache         Do not use cached files for build
+  --build-args TEXT  Set build-time variables, like in docker
   --help             Show this message and exit.
 ```
 
