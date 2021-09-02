@@ -71,9 +71,8 @@ class BuildTestManager:
                     stream = re.sub(r" +", " ", output["stream"].strip())
                     if stream != "":
                         log.debug(stream)
+                        logs.append(stream)
                         if "Step" in stream:
-                            log.debug(stream)
-                            logs.append(stream)
                             pbar.update()
                 elif "errorDetail" in output:  # pragma: no cover
                     # print last message showing the error
@@ -104,9 +103,11 @@ class BuildTestManager:
         build_args: str = None,
     ):
 
-        script = Path(script).resolve()
+        script = Path(script)
         if not script.is_file():
-            raise FileNotFoundError(f"Given script does not exist: {script}")
+            raise FileNotFoundError(
+                "Given script does not exist in build context ({Path.cwd()}): {script}"
+            )
 
         # Setup task name, if none provided just take the script name
 
@@ -161,9 +162,7 @@ class BuildTestManager:
         tmp_dockerfile_path = tmp_dockerfile.name
 
         tmp_dockerfile.write(content.encode())
-        tmp_dockerfile.write(
-            f"\nCOPY {script.name} /opt/archipel/worker_script.py".encode()
-        )
+        tmp_dockerfile.write(f"\nCOPY {script} /opt/archipel/worker_script.py".encode())
         tmp_dockerfile.seek(0)
 
         docker_tag = f"alpineintuion/archipel-task-{task}:latest"
@@ -187,7 +186,7 @@ class BuildTestManager:
             # if build failed, be sure temp file is close and removed
             tmp_dockerfile.close()
 
-        log.info(f"Task '{task}' successfully built!")
+        log.info(f"Task '{task}' successfully built! (docker tag: {dockerfile})")
 
         return task, docker_img_hash, task_class_name
 
@@ -219,21 +218,20 @@ class BuildTestManager:
                 f"python -c 'from worker_script import {worker_class}; "
                 + f"{worker_class}().unit_testing()'"
             )
-            error = self.client.containers.run(img_name, cmd, stderr=True)
+            logs = self.client.containers.run(img_name, cmd, stderr=True)
 
         except docker.errors.APIError as error:
-            raise RuntimeError(f"Error while reaching docker: {error}")
+            raise RuntimeError(f"Error while unit testing worker: {error}")
 
         except docker.errors.ContainerError as error:
             log.error(f"There was a problem during the tests: \n{error}")
             return False
 
-        if error == b"":
-            log.info("Worker test successful!")
-            return True
-        else:
-            log.error(f"There was a problem during the tests, logs: \n{error.decode()}")
-            return False
+        if logs != b"":
+            log.info(f"Worker starting logs:\n{logs.decode()}")
+        log.info("Worker test successful!")
+
+        return True
 
     def verify_worker(
         self,

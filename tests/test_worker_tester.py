@@ -17,7 +17,12 @@ import pytest
 from i2_client.worker_tester import BuildTestManager
 
 mirror = Path("examples/tasks/mirror.py")
-docker_img = "alpineintuion/archipel-task-mirror:latest"
+mirror_img = "alpineintuion/archipel-task-mirror:latest"
+
+face_alignment = Path("examples/tasks/face_alignment/face_alignment.py")
+face_alignment_dockerfile = Path("examples/tasks/face_alignment/Dockerfile")
+face_alignment_img = "alpineintuion/archipel-task-mirror:latest"
+
 client = docker.from_env()
 
 
@@ -63,7 +68,7 @@ def test_build_task(mocker):
             for tag in img.tags:
                 if "archipel" in tag or "redis" in tag:
                     archipel_imgs.append(tag)
-        assert docker_img in archipel_imgs
+        assert mirror_img in archipel_imgs
 
         print("script do not exist")
         with pytest.raises(FileNotFoundError):
@@ -145,18 +150,40 @@ def test_test_worker(mocker):
     success = btm.test_worker("zbl", "zbl")
     assert not success
 
-    print("Worker test successful")
+    print("Worker test successful with logs")
+    mocker.patch(func, return_value=b"ZBL")
+    success = btm.test_worker("zbl", "zbl")
+    assert success
+
+    print("Worker test successful without logs")
     mocker.patch(func, return_value=b"")
     success = btm.test_worker("zbl", "zbl")
     assert success
 
-    print("Worker test fail")
-    mocker.patch(func, return_value=b"error")
-    success = btm.test_worker("zbl", "zbl")
-    assert not success
 
+def test_verify_worker_mirror(mocker):
+    """Test full pipeline of worker testing without dockerfile."""
 
-def test_verify_worker(mocker):
-    """Test full pipeline of worker testing."""
     with cd(mirror.parent):
         assert BuildTestManager(verbose=True).verify_worker(mirror.name)
+
+    with cd(mirror.parents[1]):
+        path = str(mirror).replace(f"{mirror.parents[1]}/", "")
+        assert BuildTestManager(verbose=True).verify_worker(path)
+
+
+def test_verify_worker_face_alignment(mocker):
+    """Test full pipeline of worker testing with dockerfile."""
+
+    btm = BuildTestManager()
+
+    with cd(face_alignment.parent):
+        assert btm.verify_worker(
+            face_alignment.name, dockerfile=face_alignment_dockerfile.name
+        )
+
+    new_home = face_alignment.parents[1]
+    with cd(new_home):
+        script = str(face_alignment).replace(f"{new_home}/", "")
+        dockerfile = str(face_alignment_dockerfile).replace(f"{new_home}/", "")
+        assert btm.verify_worker(script, dockerfile=dockerfile)
