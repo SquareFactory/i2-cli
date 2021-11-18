@@ -22,6 +22,7 @@ setup(
         "archipel-utils>=0.1.2",
         "click>=8.0",
         "docker>=4.4",
+        "enlighten>=1.10",
         "msgpack>=1.0",
         "numpy>=1.19",
         "opencv-python>=4.5",
