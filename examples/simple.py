@@ -21,7 +21,7 @@ parser.add_argument(
     "--access_uuid",
     type=str,
     help="",
-    default="access:472f9457-072c-4a1a-800b-75ecdd6041e1",
+    default="472f9457-072c-4a1a-800b-75ecdd6041e1",
 )
 args = parser.parse_args()
 

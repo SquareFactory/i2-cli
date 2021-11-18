@@ -32,7 +32,7 @@ Simple inference:
 ```bash
 i2 infer \
   --url wss://archipel-beta1.isquare.ai/43465956-8d6f-492f-ad45-91da69da44d0 \
-  --access_uuid access:48c1d60a-60fd-4643-90e4-cd0187b4fd9d \
+  --access_uuid 48c1d60a-60fd-4643-90e4-cd0187b4fd9d \
   examples/test.png
 ```
 Other examples can be found [here](docs/getting_started.md).
