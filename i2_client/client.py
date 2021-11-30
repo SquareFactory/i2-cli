@@ -30,9 +30,11 @@ class I2Client:
         self.websocket = None
 
         encode_functions = {
+            "dict": lambda x: x,
             "numpy.ndarray": utils.serialize_img,
         }
         decode_functions = {
+            "dict": lambda x: x,
             "numpy.ndarray": utils.deserialize_img,
         }
         self.available_transforms = {
