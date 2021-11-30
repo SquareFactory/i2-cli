@@ -15,7 +15,21 @@ import numpy as np
 
 
 def open_file(file: Union[str, PosixPath]) -> Union[str, np.ndarray, dict]:
-    """Opens any file before sending to archipel."""
+    """Opens any file before sending to an archipel.
+
+    Currently supported files: Text (.txt), JSON (.json) and images (.png,.jpeg & .jpg).
+
+    Args:
+        file: The path of the file to open.
+
+    Returns:
+        The contents of the file, the format depending on the file type.
+
+    Raises:
+        FileNotFoundError: Invalid file path specified.
+        RuntimeError: Unsupportted file extension.
+
+    """
     if isinstance(file, PosixPath):
         file = str(file)
     if not Path(file).exists():
@@ -37,7 +51,20 @@ def open_file(file: Union[str, PosixPath]) -> Union[str, np.ndarray, dict]:
 
 
 def save_file(data: Union[str, np.ndarray, dict], path: Union[str, PosixPath]) -> None:
-    """Save a file in any format."""
+    """Save a file in any format.
+
+    Currently supported files: Text (.txt), JSON (.json) and images (.png,.jpeg & .jpg).
+
+    Args:
+        data: Input data, can be string, dictionnary or image in numpy array form.
+        path: Path to save the input data.
+
+    Returns:
+        None. Saves the data to a file.
+
+    Raises:
+        RuntimeError: Unsupported extension or invalid datatype/extension combination.
+    """
     if isinstance(path, PosixPath):
         path = str(path)
     suffix = Path(path).suffix

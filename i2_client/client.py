@@ -18,9 +18,23 @@ log = logging.getLogger(__name__)
 
 
 class I2Client:
-    """A class to manage the connection to a worker."""
+    """A class to manage the connection to a worker and inferences."""
 
     def __init__(self, url: str, access_key: str, debug: bool = True):
+        """Initialize the isquare client.
+
+        Args:
+            url: Url of the model to use (provided on isquare.ai).
+            access_key: Access key for the model (generated on isquare.ai)
+            debug: Optional; Show extensive logs.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+
         self.url = url
         self.access_key = access_key
 
@@ -43,7 +57,19 @@ class I2Client:
         }
 
     async def __aenter__(self):
-        """Async context manager enter, including archipel connection."""
+        """Async context manager enter, including archipel connection.
+
+        Args:
+            None.
+
+        Returns:
+            The client, connected to archipel with the given info.
+
+        Raises:
+            ConnectionError: There's a problem connecting to archipel with
+                the specified url/access key pair.
+        """
+
         self._conn = websockets.connect(self.url)
         self.websocket = await self._conn.__aenter__()
 
@@ -86,11 +112,36 @@ class I2Client:
         return self
 
     async def __aexit__(self, *args, **kwargs):
-        """Async context manager exit."""
+        """Async context manager exit.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
         await self._conn.__aexit__(*args, **kwargs)
 
     async def async_inference(self, inputs, encode=None, decode=None):
-        """Send inference to archipel in async way."""
+        """Send inference to archipel in async way.
+
+        Args:
+            inputs: The inputs to send to the worker.
+            encode: Optional; Specify a specific input encoding.
+            decode: Optional; Specify a specific output decoding.
+
+        Returns:
+            The outputs from the inference.
+
+        Raises:
+            ValueError: There was an error encoding or packing the given
+                input (the specific error is printed).
+            RuntimeError: Ther was an error during the inference (the
+                specific error message is printed).
+        """
         if not isinstance(inputs, list):
             inputs = [inputs]
 
@@ -130,7 +181,19 @@ class I2Client:
         return outputs
 
     def inference(self, inputs, encode=None, decode=None):
-        """Send inference to archipel in sync way."""
+        """Send inference to archipel in sync way.
+
+        Args:
+            inputs: The inputs to send to the worker.
+            encode: Optional; Specify a specific input encoding.
+            decode: Optional; Specify a specific output decoding.
+
+        Returns:
+            The outputs from the inference.
+
+        Raises:
+            None.
+        """
 
         async def _inference(self, inputs):
             await self.__aenter__()

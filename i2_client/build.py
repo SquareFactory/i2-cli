@@ -24,6 +24,18 @@ class BuildManager:
     """i2 build manager."""
 
     def __init__(self, debug: bool = False):
+        """Initialize build manager.
+
+        Args:
+            debug: Optional; Show extensive logs.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+
         self.client = docker.from_env()
 
         if debug:
@@ -60,6 +72,20 @@ class BuildManager:
         tag: str,
         additional_args: dict = {},
     ):
+        """Build the docker image for a worker in current dir.
+
+        Args:
+            tag: The tag for the image to build.
+            additional_args: Optional; Additional arguments for the build.
+
+        Returns:
+            The tag of the built docker image.
+
+        Raises:
+            docker.errors.BuildError: There was an error during the build (the specific error is printed).
+
+        """
+
         client = docker.APIClient(base_url="unix://var/run/docker.sock")
 
         log.info(f"Building '{tag}'...")
@@ -113,6 +139,19 @@ class BuildManager:
         return self.client.images.get(tag).id.split(":")[-1]
 
     def _test_task(self, docker_img, worker_class):
+        """Test the forward pass of a built worker.
+
+        Args:
+            docker_img: Name of the docker image to test.
+            worker_class: Name of the worker python class.
+
+        Returns:
+            None.
+
+        Raises:
+            RuntimeError: There was a problem with docker during the tests.
+        """
+
         log.info("Testing...")
 
         try:
@@ -142,6 +181,24 @@ class BuildManager:
         cpu: bool = False,
         no_cache: bool = False,
     ):
+        """Build an archipel task.
+
+        Args:
+            script: The worker script.
+            dockerfile: Optional; Name of the Dockerfile. If none provided, base
+                image is used.
+            build_args: Optional; Set build-time variables, like in docker.
+            docker_tag: Optional; Name and optionally a tag in the 'name:tag' format.
+            cpu: Optional; Force the use of CPU base image when no dockerfile available.
+            no_cache: Optional; Do not use previous cache when building the image.
+
+        Returns:
+            None.
+
+        Raises:
+            ValueError: Invalid Dockerfile contents or build arguments.
+            FileNotFoundError: Invalid locaiton specified for script or Dockerfile.
+        """
 
         cwd = Path.cwd()
 
@@ -231,6 +288,17 @@ class BuildManager:
         log.info(f"Building and testing done! (docker tag: '{docker_tag}')")
 
     def verify_task(self, docker_tag):
+        """Verify that a built docker image is valid.
+
+        Args:
+            docker_tag: Name of the docker image to test.
+
+        Returns:
+            None.
+
+        Raises:
+            RuntimeError: There was a problem with docker during the tests.
+        """
         try:
             cmd = "cat /opt/archipel/worker_script.py".split()
             out = self.client.containers.run(docker_tag, cmd, stderr=True)
