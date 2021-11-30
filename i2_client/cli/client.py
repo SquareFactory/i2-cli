@@ -9,7 +9,6 @@ permission, please contact the copyright holders and delete this file.
 import click
 import cv2
 import numpy as np
-from click import Context
 
 from i2_client.client import I2Client
 from i2_client.utils import open_file, save_file
@@ -25,14 +24,22 @@ from i2_client.utils import open_file, save_file
 @click.option(
     "--access-key", type=str, required=True, help="Access key provided by isquare."
 )
-@click.option("--save-path", type=str, help="Path to save your data (img,txt or json).")
-@click.pass_context
-def infer(ctx: Context, data, url, access_key, save_path):  # pragma: no cover
+@click.option(
+    "--save-path", type=str, help="Path to save your data (img, txt or json)."
+)
+@click.option(
+    "--debug",
+    is_flag=True,
+    help="Increase logging verbosity level to debug",
+)
+def infer(data, url, access_key, save_path, debug):  # pragma: no cover
     """Send data for inference."""
-    ctx.ensure_object(dict)
-    client = I2Client(url, access_key, ctx.obj["VERBOSE"])
+
+    client = I2Client(url, access_key, debug)
+
     content = open_file(data)
     output = client.inference(content)
+
     if save_path is not None:
         save_file(output, save_path)
     else:

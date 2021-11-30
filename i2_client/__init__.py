@@ -12,4 +12,4 @@ from .client import I2Client  # noqa
 
 __version__ = "0.2.3"
 
-cli = create_cli()
+i2_cli = create_cli()

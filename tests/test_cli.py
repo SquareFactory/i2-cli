@@ -7,36 +7,55 @@ permission of the copyright holders. If you encounter this file and do not have
 permission, please contact the copyright holders and delete this file.
 """
 
-import cv2
 from click.testing import CliRunner
 
-from i2_client import cli
+from i2_client import i2_cli
 
 runner = CliRunner()
 ctx = {"VERBOSE": False}
+
 mirror = "examples/tasks/mirror.py"
-test_image = cv2.imread("examples/test.jpg")
+mirror_img = "i2-task-mirror:latest"
+test_image = "examples/test.jpg"
+
+face_alignment = "examples/tasks/face_alignment/face_alignment.py"
+dockerfile = "examples/tasks/face_alignment/Dockerfile"
 
 
 def test_cli(mocker):
     """Test cli."""
     runner = CliRunner()
-    cmds = ["infer", "test"]
-    for cmd in cmds:
-        cmd += " --help"
-        print(f"i2 {cmd}")
-        assert runner.invoke(cli, cmd.split(), obj=ctx).exit_code == 0
 
+    # inference
 
-def test_cli_test_worker(mocker):
-    """Test test worker cli."""
+    mocker.patch("i2_client.client.I2Client.inference")
+    mocker.patch("i2_client.cli.client.save_file")
 
-    mocker.patch("i2_client.worker_tester.BuildTestManager.verify_worker")
+    conn = ["--url", "url", "--access-key", "ak"]
 
     cmds = [
-        ["test", "worker", mirror, "--build-args", "TEST"],
-        ["test", "worker", mirror, "--build-args", "TEST", "--build-args", "TEST"],
+        ["infer", test_image, *conn],
+        ["infer", test_image, *conn, "--save-path", "test.jpg"],
     ]
+
+    # build & verification
+
+    mocker.patch("i2_client.build.BuildManager.build_task")
+
+    cmds += [
+        ["build", mirror],
+        ["build", face_alignment, "-df", dockerfile],
+        ["build", face_alignment, "--dockerfile", dockerfile],
+        ["build", mirror, "-nc"],
+        ["build", mirror, "--no-cache"],
+        ["build", mirror, "--cpu"],
+        ["build", mirror, "-ba", "TEST"],
+        ["build", mirror, "--build-args", "TEST"],
+        ["build", mirror, "--build-args", "TEST", "--build-args", "TEST"],
+        ["test", mirror_img],
+    ]
+
     for cmd in cmds:
-        results = runner.invoke(cli, cmd, obj=ctx)
-        assert results.exit_code == 0, results
+        print("i2 " + " ".join(cmd))
+        results = runner.invoke(i2_cli, cmd, obj=ctx)
+        assert results.exit_code == 0, vars(results)

@@ -27,6 +27,13 @@ Commands and their usage are described [here](docs/commands.md).
 
 ## Examples
 
+- Build your i2 compatible docker image:
+
+
+```bash
+ i2 build examples/tasks/mirror.py
+```
+
 Simple inference:
 
 ```bash

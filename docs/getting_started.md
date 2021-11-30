@@ -18,21 +18,29 @@ In the same spirit, we encourage you to write scripts implementing isquare model
 
 ### Testing
 
-The client allows you to test your model before uploading it to isquare.ai. We encourage you to test this feature, which we are sure will save you alot of time. For instance, try running:
+The client allows you to build and test your model before uploading it to isquare.ai. We encourage 
+you to test this feature, which we are sure will save you alot of time. For instance, try running:
 
 ```bash
-i2 test worker examples/tasks/mirror.py
+i2 build examples/tasks/mirror.py --cpu
 ```
 You should see following output:
 
 ```bash
-14:51:29 - INFO - Building task 'mirror'...
-14:51:29 - INFO - Docker image creation
-14:51:29 - INFO - No Dockerfile in 'examples/tasks', use base image
-100%|█████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 10485.76 steps/s]
-14:51:31 - INFO - Task 'mirror' successfully built!
-14:51:31 - INFO - Testing the worker
-14:51:32 - INFO - Worker test successful!
+[15:47:44] INFO     Building task from 'examples/tasks/mirror.py'...
+[15:47:44] INFO     No Dockerfile found, use CPU base image
+[15:47:44] INFO     Building 'i2-task-mirror:latest'...
+[15:47:45] INFO     [DOCKER SDK LOG] Step 1/2 : FROM alpineintuition/archipel-base-cpu
+[15:47:45] INFO     [DOCKER SDK LOG]  ---> e45cbd84d372
+[15:47:45] INFO     [DOCKER SDK LOG] Step 2/2 : COPY examples/tasks/mirror.py /opt/archipel/worker_script.py
+[15:47:45] INFO     [DOCKER SDK LOG]  ---> Using cache
+[15:47:45] INFO     [DOCKER SDK LOG]  ---> cf0f4cf35f32
+[15:47:45] INFO     [DOCKER SDK LOG] Successfully built cf0f4cf35f32
+[15:47:45] INFO     [DOCKER SDK LOG] Successfully tagged i2-task-mirror:latest
+[15:47:45] INFO     Building ended successfully!
+[15:47:45] INFO     Testing...
+[15:47:46] INFO     Testing ended successfully!
+[15:47:46] INFO     Building and testing done! (docker tag: 'i2-task-mirror:latest')
 ```
 
 Indicating that the test was successfull.

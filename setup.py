@@ -26,12 +26,13 @@ setup(
         "msgpack>=1.0",
         "numpy>=1.19",
         "opencv-python>=4.5",
+        "rich>=10.13",
         "websockets>=8.1",
     ],
     packages=find_packages(),
     entry_points="""
         [console_scripts]
-        i2=i2_client:cli
+        i2=i2_client:i2_cli
     """,
     python_requires=">=3.8",
 )
