@@ -17,9 +17,6 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install i2-client
-        run: pip install --editable .
-
       - name: Install Black & Flake8 & MyPy & Bandit
         run: |
           pip install \
