@@ -95,11 +95,8 @@ class I2Client:
         for key, value in types.items():
             arg = "encode" if key == "input_type" else "decode"
 
-            if value == "None":
-                log.warning(
-                    f"No {key} provided by task. You must provide one "
-                    + f"to the inference function with the '{arg}' argument."
-                )
+            if value is None:
+                log.info(f"{key}: built-in")
             elif value not in self.available_transforms[arg]:
                 log.warning(
                     f"Unknown {key} provided by task ({key}). You must provide "
