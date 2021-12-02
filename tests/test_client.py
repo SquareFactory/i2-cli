@@ -57,7 +57,7 @@ async def test_archipel_client_connection_async_success(setup):
     """Test full connection and inference pipeline."""
 
     url, host, port = setup
-    fake_data = np.random.randint(0, 255, (250, 250, 3))
+    fake_data = np.random.randint(0, 255, (250, 250, 3), dtype=np.uint8)
 
     async def fake_user():
         await asyncio.sleep(0.1)
