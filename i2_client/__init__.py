@@ -10,6 +10,6 @@ permission, please contact the copyright holders and delete this file.
 from .cli import create_cli
 from .client import I2Client  # noqa
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 i2_cli = create_cli()
