@@ -172,8 +172,13 @@ And that's it!
 ## Step 2: Deploy your model
 *Congratulations! you've adapted your code to make it isquare compatible. Once used to it, it'll take only a few minutes to make your model isquare-compatible. The next step is deploying the model on our servers.* (Comming soon)
 ### Step 2.1: Login to isquare.ai
+You can login into isquare.ai using your google or github account.
+TODO: Images, finalize when platform UX is final
 ### Step 2.2: Build using a git repository
+TODO: Images, finalize when platform UX is final
 ### Step 2.3: Deployment, usage and access
+To deploy your model once it is built, just click the "START button.
+When choosing one of your deployed models, you can choose to add an access key. Once this key is generated, you can use yoyur model, as explained in [here](getting_started.md).
 
 
 ## Step 3: Monitor usage and optimize your model
