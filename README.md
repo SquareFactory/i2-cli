@@ -25,7 +25,7 @@ _Note_: If you only need the client for inference, this is not required.
 
 Commands and their usage are described [here](docs/commands.md).
 
-Guidelines on the code adaptation required to deploy a model on isquare.ai can be found [here](docs/code_preparation.md)
+Guidelines on the code adaptation required to deploy a model on isquare.ai can be found [here](docs/isquare_tutorial.md)
 
 ## Examples
 
