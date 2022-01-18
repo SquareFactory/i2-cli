@@ -3,7 +3,8 @@
 
 ## Use case: Face Pixelizer
 France recently passed a  new law, named "sécurité globale". It makes it illegal to publish pictures or videos showing policemen without anonymizing. We put ourselves in the case of a person who wants to make an app, permitting to stream and report events, including ones with policemen presence, but with an AI model blurring the faces directly. While understandable for their family and own security this law also makes it tricky to live report political events. Therefore, we developed a machine learning model which automatically blurs faces in any image, and is capable of doing so in real time. In this tutorial, we will show how to deploy this model efficiently with isquare.ai. We trained a simple face detection algorithm (retinaface) and changed it to blur the faces. When testing the model on a picture of the street parade, we see the algorithm in action. 
-![example](imgs/plot.jpg)
+
+![example](imgs/face_pixelizer.jpg)
 
 We won't go into the details of the code (which can be found [here](face_pixelizer.py)), but this is appliable to any model that is waiting to be deployed.
 
