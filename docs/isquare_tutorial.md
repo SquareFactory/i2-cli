@@ -12,7 +12,7 @@ We won't go into the details of the code (which can be found [here](face_pixeliz
 
 ### Step 1.1: Create your worker script
 The first step is to make our code isquare compatible. The good news is that no code change is necessary, we just need to write a small script, which we will call the **worker script** from now on. This script contains one class, our **worker**:
-```
+```python
 from archipel.workers.worker import ImagesToImagesWorker
 
 from face_pixelizer import FacePixelizer
@@ -70,11 +70,11 @@ More types will be added on the way. If the input outputs types you are looking 
 You can specify multiple classes and functions inside your workerscript (you can even write your whole code inside it, although we do not recommend it). The `__task_class_name__` specifies which class is your workerclass, in our case `ArchipelFacePixeliser`.
 
 The worker class defines what is to be done when starting the model and during inference. The first step is to define your class, which inherits from a worker class:
-```
+```python
 class ArchipelFacePixelizer(ImagesToImagesWorker):
 ```
 Our model can be started with different arguments. For example, the threshhold defines from which confidence value the face is blurred, and we might want to change that value depending on the application, without deploying a new model.
-```
+```python
 def add_model_specific_args(self, parent_parser):
         parent_parser.add_argument(
             "--input-size",
@@ -92,7 +92,7 @@ def add_model_specific_args(self, parent_parser):
 Adding arguments works as with many CLI parsers in python. You specify a name, a default value, a type and a helper. These values can be modified directly when launching your model from isquare.ai.
 
 When we start our model, some initializations have to be done. For example, we have to load our model to gpu and apply the arguments that were specified above. All these processes are handled in the `setup_model` method, which runs once at worker startup.
-```
+```python
 def setup_model(self):
         self.model = FacePixelizer(
             self.args.input_size,
@@ -104,9 +104,9 @@ def setup_model(self):
 In our case, we jus initialize our class with the correct arguments, but again, anything can be done here. The workers have full internet access by default, so you could download the weights, check the weather, run a cold start, or anything else.
 
 The last thing we need to define is our model's forward pass, which is represented by the forward method of the worker. It's here that the inference happens:
-```
+```python
 def forward(self, imgs):
-        return self.model(imgs)
+    return self.model(imgs)
 ```
 
 In our case, it just calls the `__call__` method of our model, but again, anything is accepted, as long as input and output types are respected.
@@ -116,7 +116,7 @@ And that's all you need to get going from the code point of view. Let's proceed,
 
 ### Step 1.2: Set up your environment
 Most deep learning models are not coded from scratch and depend on external libraries (e.g. python, tensorflow). With isquare.ai, all requirements are handled by a Dockerfile, which is basically a set of instructions which sets up an environment. If you’re new to Docker, check the [documentation](https://docs.docker.com/engine/reference/builder/). We need to create a file containing Docker instructions (usually called Dockerfile):
-```
+```dockerfile
 FROM alpineintuition/archipel-base-cpu:latest
 
 COPY requirements.txt requirements.txt
@@ -141,21 +141,21 @@ numpy==1.19.2
 torch==1.7.0
 torchvision==0.8.1
 ``` 
-These are saved to a file at the root of the directory, called requirements.txt. Other than the dependencies, we also have the weights (retinaface_moblenet_0.25.pth) of the trained model which are located at the root of our repository, along with the requirements file. 
+These are saved to a file at the root of the directory, called `requirements.txt`. Other than the dependencies, we also have the weights (`retinaface_mobilenet_0.25.pth`) of the trained model which are located at the root of our repository, along with the requirements file. 
 Now that we have everything we need, let's write a Dockerfile. We start by specifying the base image:
-```
+```dockerfile
 FROM alpineintuition/archipel-base-gpu:latest
 ```
-Isquare.ai provides two base images, that you have the choice between `archipel-base-gpu` and `archipel-base-cpu`. As their names suggest, one is optimzed for GPU usage and the other for CPU usage. Since our model was trained on GPU and is adapted for GPU inference, we choose `archipel-base-gpu`.
+Isquare.ai provides two base images, that you have the choice between `archipel-base-gpu` and `archipel-base-cpu`. As their names suggest, one is optimized for GPU usage and the other for CPU usage. Since our model was trained on GPU and is adapted for GPU inference, we choose `archipel-base-gpu`.
 
 The next step is to install all our python packages. To do this, we copy the requirements file we created earlier, and install it with pip:
-```
+```dockerfile
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 ```
 
 Our worker depends on some external scripts, so let's create a folder for them and copy them.
-```
+```dockerfile
 ARG FACE_PIXELIZER=/opt/face_pixelizer
 RUN mkdir ${FACE_PIXELIZER}
 COPY face_pixelizer.py ${FACE_PIXELIZER}
@@ -163,10 +163,13 @@ COPY retinaface.py ${FACE_PIXELIZER}
 COPY utils.py ${FACE_PIXELIZER}
 ENV PYTHONPATH="${FACE_PIXELIZER}:${PYTHONPATH}"
 ```
-We simply create a folder at `/opt/`  and copy our files. The last lines adds the folder to the pythonpath, allowing easy imports of all utilities.
+We simply create a folder at `/opt/`  and copy our files. The last lines adds the folder to the `PYTHONPATH`, allowing easy imports of all utilities.
 
-The last steps is to copy our wheights:
+The last steps is to copy our weights:
+
+```dockerfile
 COPY "retinaface_mobilenet_0.25.pth" "${FACE_PIXELIZER}/retinaface_mobilenet_0.25.pth"
+```
 
 And that's it!
 ## Step 2: Deploy your model
@@ -182,12 +185,12 @@ When choosing one of your deployed models, you can choose to add an access key. 
 
 
 ## Step 3: Monitor usage and optimize your model
-Since the "sécurité globale" amendment on the interdiction to show the faces of policeman did not passs, our model is used way less than expected, and we're looking to reduce costs. We can tradeoff a bit of the performance of the model for a cost optimization by migrating the model to CPU. Since our model automatically detects if a gpu is present, we only need to change the first line of our Dockerfile from
-```
+Since the "sécurité globale" amendment on the interdiction to show the faces of policeman did not pass, our model is used way less than expected, and we're looking to reduce costs. We can tradeoff a bit of the performance of the model for a cost optimization by migrating the model to CPU. Since our model automatically detects if a gpu is present, we only need to change the first line of our Dockerfile from
+```dockerfile
 FROM alpineintuition/archipel-base-gpu:latest
 ```
 to
-```
+```dockerfile
 FROM alpineintuition/archipel-base-cpu:latest
 ```
 We've just saved costs by changing one letter in the dockerfile!
@@ -195,7 +198,7 @@ We've just saved costs by changing one letter in the dockerfile!
 Additionaly, we're not sure how good our model performs and we've had a few complaints, and we would like to monitor the threshold values for our predictions. We think their might be a model drift, and that the threshold for the test data is not adapted to a real life scenario.
 
 Monitoring this value is very simple to achieve. Inside your forward method, we just add:
-```
+```python
 self.log(threshold_value)
 ```
 This value is now logged, and you can retrieve it on your dashboard on isquare.ai. In this way, the parameters of the model can be adpated to fit the real life data, and the real performance of the model assessed. 
