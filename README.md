@@ -25,6 +25,8 @@ _Note_: If you only need the client for inference, this is not required.
 
 Commands and their usage are described [here](docs/commands.md).
 
+Guidelines on the code adaptation required to deploy a model on isquare.ai can be found [here](docs/isquare_tutorial.md)
+
 ## Examples
 
 - Build your i2 compatible docker image:
@@ -43,3 +45,5 @@ i2 infer \
   examples/test.png
 ```
 Other examples can be found [here](docs/getting_started.md).
+
+
