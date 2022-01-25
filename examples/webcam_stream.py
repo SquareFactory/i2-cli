@@ -12,7 +12,10 @@ import asyncio
 import time
 
 import cv2
+import imutils
 import numpy as np
+from rich.live import Live
+from rich.spinner import Spinner
 
 from i2_client import I2Client
 
@@ -20,6 +23,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--url", type=str, help="", required=True)
 parser.add_argument("--access_uuid", type=str, help="", required=True)
 parser.add_argument("--frame_rate", type=int, help="", default=15)
+parser.add_argument("--resize_width", type=int, help="", default=None)
 args = parser.parse_args()
 
 
@@ -30,29 +34,47 @@ async def main():
     prev = 0
 
     async with I2Client(args.url, args.access_uuid) as client:
-        while True:
-            time_elapsed = time.time() - prev
-            check, frame = cam.read()
-            if time_elapsed < 1.0 / args.frame_rate:
-                # force the webcam frame rate so the bottleneck is the
-                # inference, not the camera performance.
-                continue
-            prev = time.time()
 
-            print("send...", end=" ")
+        spinner = Spinner("dots2", "connecting...")
+        with Live(spinner, refresh_per_second=20):
 
-            start = time.time()
-            outputs = await client.async_inference(frame)
-            end = time.time()
+            durations = []
 
-            print(f"got! in {end - start:.4f} secs (send + inference + receive)")
+            while True:
 
-            concatenate_imgs = np.concatenate((frame, outputs[0]), axis=1)
-            cv2.imshow("original / inference ", concatenate_imgs)
+                # 1. get webcam frame
 
-            key = cv2.waitKey(1)
-            if key == 27:
-                break
+                time_elapsed = time.time() - prev
+                check, frame = cam.read()
+                if time_elapsed < 1.0 / args.frame_rate:
+                    # force the webcam frame rate so the bottleneck is the
+                    # inference, not the camera performance.
+                    continue
+                prev = time.time()
+
+                if args.resize_width is not None:
+                    frame = imutils.resize(frame, width=args.resize_width)
+
+                # 2. inference
+
+                start = time.time()
+                outputs = await client.async_inference(frame)
+                durations.append(time.time() - start)
+
+                # 3. show
+
+                spinner.text = (
+                    f"send + infer + receive: {durations[-1]:.4f} secs "
+                    + f"(mean: {np.mean(durations):.4f}, std: {np.std(durations):.4f}, "
+                    + f"min: {np.min(durations):.4f}, max: {np.max(durations):.4f})"
+                )
+
+                concatenate_imgs = np.concatenate((frame, outputs[0]), axis=1)
+                cv2.imshow("original / inference ", concatenate_imgs)
+
+                key = cv2.waitKey(1)
+                if key == 27:
+                    break
 
         cam.release()
         cv2.destroyAllWindows()
