@@ -22,6 +22,7 @@ setup(
         "archipel-utils>=0.1.6",
         "click>=8.0",
         "docker>=4.4",
+        "imutils>=0.5.4",
         "msgpack>=1.0",
         "numpy>=1.19",
         "rich>=10.13",
