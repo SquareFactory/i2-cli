@@ -19,7 +19,7 @@ setup(
     name="i2_client",
     version=version,
     install_requires=[
-        "archipel-utils>=0.1.6",
+        "archipel-utils==0.1.7",
         "click>=8.0",
         "docker>=4.4",
         "imutils>=0.5.4",
