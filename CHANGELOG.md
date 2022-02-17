@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
+
+## [0.4.1] - 2022.02.17
+
+### Features
+
+- **client inference return tuple with a bool representing inference success/fail and inference/error msg (#34)**
+
+### Improvements
+
+- doc improvements
+- better webcam example (#29)
+- updated `archipel-utils` version & remove deprecated warnings (#32)
+
+### Fixes 
+
+- handle case when `cv2` not installed when inference (#31)
+
+
 ## [0.3.1] - 2021-12-02
 
 ### Improvements
