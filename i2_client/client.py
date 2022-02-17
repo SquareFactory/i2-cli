@@ -45,11 +45,11 @@ class I2Client:
 
         encode_functions = {
             "dict": lambda x: x,
-            "numpy.ndarray": utils.serialize_img,
+            "numpy.ndarray": utils.serialize_array,
         }
         decode_functions = {
             "dict": lambda x: x,
-            "numpy.ndarray": utils.deserialize_img,
+            "numpy.ndarray": utils.deserialize_array,
         }
         self.available_transforms = {
             "encode": encode_functions,
@@ -95,16 +95,16 @@ class I2Client:
         for key, value in types.items():
             arg = "encode" if key == "input_type" else "decode"
 
-            if value is None:
+            if value == "None" or value is None:
                 log.info(f"{key}: built-in")
-            elif value not in self.available_transforms[arg]:
+            elif value in self.available_transforms[arg]:
+                log.info(f"{key}: {value}")
+                self.transforms[arg] = self.available_transforms[arg][value]
+            else:
                 log.warning(
                     f"Unknown {key} provided by task ({key}). You must provide "
                     + f"one to the inference function with the '{arg}' argument."
                 )
-            else:
-                log.info(f"{key}: {value}")
-                self.transforms[arg] = self.available_transforms[arg][value]
 
         return self
 
