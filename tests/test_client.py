@@ -62,8 +62,11 @@ async def test_archipel_client_connection_async_success(setup):
     async def fake_user():
         await asyncio.sleep(0.1)
         async with I2Client(url, "good:access_key") as client:
-            inference = await client.async_inference(fake_data)
-            assert np.equal(inference, fake_data).all()
+            outputs = await client.async_inference(fake_data)
+            assert len(outputs) == 1
+            success, output = outputs[0]
+            assert success
+            assert np.equal(output, fake_data).all()
 
     async def fake_cld(websocket, path):
         recv = await websocket.recv()
@@ -235,7 +238,10 @@ async def test_archipel_client_connection_async_got_inference_fail(setup, mocker
         await asyncio.sleep(0.1)
         async with I2Client(url, "good:access_key") as client:
             outputs = await client.async_inference("coucou")
-            assert outputs[0] == fake_msg
+            assert len(outputs) == 1
+            success, output = outputs[0]
+            assert not success
+            assert output == fake_msg
 
     async def fake_cld(websocket, path):
         await websocket.recv()

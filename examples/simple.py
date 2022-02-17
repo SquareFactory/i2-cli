@@ -32,15 +32,16 @@ if img is None:
     raise FileNotFoundError("invalid image")
 
 start = time.time()
-outputs = i2_client.inference(img)
-end = time.time()
+success, output = i2_client.inference(img)[0]
+duration = time.time() - start
 
-print(
-    f"duration: {end - start:.4f} secs (open connection + send + inference + receive)"
-)
+print(f"duration: {duration:.4f} secs (open connection + send + inference + receive)")
+
+if not success:
+    raise RuntimeError(output)
+
 print("press on any key to quit...")
-
-concatenate_imgs = np.concatenate((img, outputs[0]), axis=1)
+concatenate_imgs = np.concatenate((img, output), axis=1)
 cv2.imshow("original / inference ", concatenate_imgs)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
