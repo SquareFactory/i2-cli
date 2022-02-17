@@ -77,7 +77,11 @@ async def main():
                 break
 
             outputs = await client.async_inference(frame)
-            out.write(outputs[0])
+
+            success, output = outputs[0]
+            if not success:
+                raise RuntimeError(output)
+            out.write(output)
 
             count += 1
             if not bool(count % 25):

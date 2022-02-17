@@ -9,6 +9,7 @@ permission, please contact the copyright holders and delete this file.
 
 import asyncio
 import logging
+from typing import Any, Callable, List, Tuple
 
 import archipel_utils as utils
 import msgpack
@@ -40,8 +41,6 @@ class I2Client:
 
         if debug:
             log.setLevel(logging.DEBUG)
-
-        self.websocket = None
 
         encode_functions = {
             "dict": lambda x: x,
@@ -122,7 +121,9 @@ class I2Client:
         """
         await self._conn.__aexit__(*args, **kwargs)
 
-    async def async_inference(self, inputs, encode=None, decode=None):
+    async def async_inference(
+        self, inputs: Any, encode: Callable = None, decode: Callable = None
+    ) -> List[Tuple[bool, Any]]:
         """Send inference to archipel in async way.
 
         Args:
@@ -131,7 +132,8 @@ class I2Client:
             decode: Optional; Specify a specific output decoding.
 
         Returns:
-            The outputs from the inference.
+            List of Tuple composed of two values: bool to indicate whether inference
+            is a success and the inference is success or an error message if fail.
 
         Raises:
             ValueError: There was an error encoding or packing the given
@@ -139,6 +141,7 @@ class I2Client:
             RuntimeError: Ther was an error during the inference (the
                 specific error message is printed).
         """
+
         if not isinstance(inputs, list):
             inputs = [inputs]
 
@@ -171,13 +174,15 @@ class I2Client:
                 inference = decoded_msg["data"]
                 if decode is not None:
                     inference = decode(inference)
-                outputs.append(inference)
+                outputs.append((True, inference))
             else:
-                outputs.append(decoded_msg["message"])
+                outputs.append((False, decoded_msg["message"]))
 
         return outputs
 
-    def inference(self, inputs, encode=None, decode=None):
+    def inference(
+        self, inputs: Any, encode: Callable = None, decode: Callable = None
+    ) -> List[Tuple[bool, Any]]:
         """Send inference to archipel in sync way.
 
         Args:
@@ -186,7 +191,8 @@ class I2Client:
             decode: Optional; Specify a specific output decoding.
 
         Returns:
-            The outputs from the inference.
+            List of Tuple composed of two values: bool to indicate whether inference
+            is a success and the inference is success or an error message if fail.
 
         Raises:
             None.
