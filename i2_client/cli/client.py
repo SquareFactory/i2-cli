@@ -6,8 +6,9 @@ This file is confidential and only available to authorized individuals with the
 permission of the copyright holders. If you encounter this file and do not have
 permission, please contact the copyright holders and delete this file.
 """
+
+
 import click
-import cv2
 import numpy as np
 
 from i2_client.client import I2Client
@@ -46,4 +47,9 @@ def infer(data, url, access_key, save_path, debug):  # pragma: no cover
         if not isinstance(output, np.ndarray):
             print(output)
         else:
-            cv2.imshow(output)
+            try:
+                import cv2
+
+                cv2.imshow(output)
+            except ImportError:
+                print("`cv2` module not available, can not show inference.")
