@@ -65,7 +65,7 @@ img = cv2.imread("test.jpg")
 
 # Initialize the client & perform inference
 inference_client = I2Client(url,access_key)
-success, output = i2_client.inference(img)[0]
+success, output = inference_client.inference(img)[0]
 ```
 
 A more complex example, showing how to stream a camera to your model, can be found [here](examples/webcam_stream.py)
