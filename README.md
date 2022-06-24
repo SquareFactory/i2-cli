@@ -3,13 +3,13 @@
 
 This repository contains the official python client for [ISquare](isquare.ai) deploy. It is available under the form of python classes which are ready to use in your code, as well as a command-line-interface. We currently support inference with image, text & json files, as well as any numpy array or python dictionnary or string, both for input and output. 
 
-The complete documentation for ISquare can be found [here](docs.isquare.ai)
+The complete documentation for ISquare can be found [here](docs.isquare.ai).
 
 ## Installation
 
 ### From pip
 
-TODO when public
+TODO when public.
 
 ### From source
 
@@ -29,7 +29,7 @@ The client can be used to verify your model build (e.g. checking if they will pr
 
 Commands and their usage are described [here](docs/commands.md).
 
-End-to-end guidelines on the code adaptation required to deploy a model on isquare.ai can be found [here](docs/isquare_tutorial.md)
+End-to-end guidelines on the code adaptation required to deploy a model on isquare.ai can be found [here](docs/isquare_tutorial.md).
 
 ## Examples
 
@@ -69,5 +69,5 @@ inference_client = I2Client(url,access_key)
 success, output = inference_client.inference(img)[0]
 ```
 
-A more complex example, showing how to stream a camera to your model, can be found [here](examples/webcam_stream.py)
+A more complex example, showing how to stream a camera to your model, can be found [here](examples/webcam_stream.py).
 
