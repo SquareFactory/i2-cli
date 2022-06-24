@@ -1,6 +1,7 @@
+![Isquare deploy logo](docs/imgs/deploy_logo.png)
 # Isquare client for Python
 
-This repository contains the official python client for [ISquare](isquare.ai). It is available under the form of python classes which are ready to use in your code, as well as a command-line-interface. We currently support inference with image, text & json files, as well as any numpy array or python dictionnary or string, both for input and output. 
+This repository contains the official python client for [ISquare](isquare.ai) deploy. It is available under the form of python classes which are ready to use in your code, as well as a command-line-interface. We currently support inference with image, text & json files, as well as any numpy array or python dictionnary or string, both for input and output. 
 
 The complete documentation for ISquare can be found [here](docs.isquare.ai)
 
