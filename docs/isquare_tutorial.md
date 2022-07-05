@@ -65,8 +65,13 @@ class ArchipelFacePixelizer(ImagesToImagesWorker):
 The imports specifies, along with any dependencies or additional functions or classes, which workertype we will be using. In our case, the model takes images as inputs and also return images (the same as before but the faces blurred), so we choose the `ImagesToImagesWorker`. The name of the workerclass always reflects inputs and outputs. For the moment, the following workers are available:
 - `ImagesToImagesWorker` (e.g. Face blurring)
 - `ImagesToDictsWorker` (e.g. classification or detection)
+- `ImagesToStringsWorker` (e.g. for image annotation)
 - `StringsToDictsWorker` (e.g. NLP model)
-More types will be added on the way. If the input outputs types you are looking for are not available, please let us know. In the meantime know thaht most data formats can be converted to strings!
+- `DictsToDictsWorker` (e.g. NLP model)
+- `StringsToImagesWorker` (e.g. Image generation from captions)
+- `DictsToImagesWorker` (e.g. Image generation from captions)
+- `DictsToStringsWorker` (e.g. NLP model)
+More types will be added on the way. If the input outputs types you are looking for are not available, please let us know by opening an issue. In the meantime know that most data formats can be converted to strings and dicts!
 
 You can specify multiple classes and functions inside your workerscript (you can even write your whole code inside it, although we do not recommend it). The `__task_class_name__` specifies which class is your workerclass, in our case `ArchipelFacePixeliser`.
 
@@ -204,6 +209,21 @@ self.log(threshold_value)
 ```
 This value is now logged, and you can retrieve it on your dashboard on isquare.ai. In this way, the parameters of the model can be adpated to fit the real life data, and the real performance of the model assessed. 
 We highly encourage monitoring apropriate metrics for your model, in this way you'll always know how well your model is really performing.
+
+## Advanced usage
+
+### Defining an example input
+Isquare will automatically test your model by generating an input corresponding to your worker class, with one exception: All `DictsToXWorker` workers. It could also be that you want to test your worker with a very specific input. In either of those cases, you can override the `get_dump_input` method of your worker, for example, as follows:
+```python
+class MusicalTastePredictor(DictsToDictsWorker):
+    """Predicts musical taste from completely arbitrary information."""
+    ...
+    ...
+    def get_dump_input(self):
+        return {"Name":"John","Origin": "Switzerland","Age":18}
+
+```
+
 
 
 
