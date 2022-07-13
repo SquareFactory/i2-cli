@@ -121,7 +121,7 @@ We strongly recommend that you implement batched inference for your model, since
 And that's all you need to get going from the code point of view. Let's proceed, setup our environment and deploy our model!
 
 ### Step 1.2: Set up your environment
-Most deep learning models are not coded from scratch and depend on external libraries (e.g. python, tensorflow). With isquare.ai, all requirements are handled by a Dockerfile, which is basically a set of instructions which sets up an environment. If you’re new to Docker, check the [documentation](https://docs.docker.com/engine/reference/builder/). We need to create a file containing Docker instructions (usually called Dockerfile):
+Most deep learning models are not coded from scratch and depend on external libraries (e.g. pytorch, tensorflow). With isquare.ai, all requirements are handled by a Dockerfile, which is basically a set of instructions which sets up an environment. If you’re new to Docker, check the [documentation](https://docs.docker.com/engine/reference/builder/). We need to create a file containing Docker instructions (usually called Dockerfile):
 ```dockerfile
 FROM alpineintuition/archipel-base-cpu:latest
 
