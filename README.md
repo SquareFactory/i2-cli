@@ -1,9 +1,9 @@
 ![Isquare deploy logo](docs/imgs/deploy_logo.png)
 # Isquare client for Python
 
-This repository contains the official python client for [ISquare](isquare.ai) deploy. It is available under the form of python classes which are ready to use in your code, as well as a command-line-interface. We currently support inference with image, text & json files, as well as any numpy array or python dictionnary or string, both for input and output. 
+This repository contains the official python client for [ISquare](http://isquare.ai) deploy. It is available under the form of python classes which are ready to use in your code, as well as a command-line-interface. We currently support inference with image, text & json files, as well as any numpy array or python dictionnary or string, both for input and output. 
 
-The complete documentation for ISquare can be found [here](docs.isquare.ai).
+The complete documentation for ISquare can be found [here](http://docs.isquare.ai).
 
 ## Installation
 
@@ -25,7 +25,7 @@ Docker >= 19.03.13
 _Note_: If you only need the client for inference, this is not required.
 
 ## Usage
-The client can be used to verify your model build (e.g. checking if they will properly run on [ISquare](isquare.ai)) and to perform inference calls to your deployed models. To use this client for inference, you need to have a model up and running on [ISquare](isquare.ai).
+The client can be used to verify your model build (e.g. checking if they will properly run on [ISquare](http://isquare.ai)) and to perform inference calls to your deployed models. To use this client for inference, you need to have a model up and running on [ISquare](http://isquare.ai).
 
 Commands and their usage are described [here](docs/commands.md).
 
@@ -36,12 +36,12 @@ End-to-end guidelines on the code adaptation required to deploy a model on isqua
 ### Command line interface
 
 #### Test if your model repository is Isquare-compatible
-To verify if your code will run smoothly on [ISquare](isquare.ai), you can perform a local build & unit test. This will build a container image with all your specific dependencies and perform an inference test. We've included an example of a simple computer vision model which returns the mirrored image it is given, and it can be tested by running:
+To verify if your code will run smoothly on [ISquare](http://isquare.ai), you can perform a local build & unit test. This will build a container image with all your specific dependencies and perform an inference test. We've included an example of a simple computer vision model which returns the mirrored image it is given, and it can be tested by running:
 
 ```bash
  i2py build examples/tasks/mirror.py
 ```
-When you deploy a model with [ISquare](isquare.ai), you will be provided a url for the model, and requested to create access keys. Using a valid url & access keys (the one displayed are an example), you can perform an inference with an Image model (e.g. the Mirror) and a `.png` image by running:
+When you deploy a model with [ISquare](http://isquare.ai), you will be provided a url for the model, and requested to create access keys. Using a valid url & access keys (the one displayed are an example), you can perform an inference with an Image model (e.g. the Mirror) and a `.png` image by running:
 
 
 ```bash
