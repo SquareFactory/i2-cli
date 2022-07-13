@@ -39,13 +39,13 @@ End-to-end guidelines on the code adaptation required to deploy a model on isqua
 To verify if your code will run smoothly on [ISquare](isquare.ai), you can perform a local build & unit test. This will build a container image with all your specific dependencies and perform an inference test. We've included an example of a simple computer vision model which returns the mirrored image it is given, and it can be tested by running:
 
 ```bash
- i2 build examples/tasks/mirror.py
+ i2py build examples/tasks/mirror.py
 ```
 When you deploy a model with [ISquare](isquare.ai), you will be provided a url for the model, and requested to create access keys. Using a valid url & access keys (the one displayed are an example), you can perform an inference with an Image model (e.g. the Mirror) and a `.png` image by running:
 
 
 ```bash
-i2 infer \
+i2py infer \
   --url wss://archipel-beta1.isquare.ai/43465956-8d6f-492f-ad45-91da69da44d0 \
   --access_uuid 48c1d60a-60fd-4643-90e4-cd0187b4fd9d \
   examples/test.png

@@ -1,9 +1,9 @@
 # i2
 
-`i2`, for isquare, is the name of the general command used for the client:
+`i2py`, for isquare python client, is the name of the general command used for the client:
 
 ```bash
-Usage: i2 [OPTIONS] COMMAND [ARGS]...
+Usage: i2py [OPTIONS] COMMAND [ARGS]...
 
   Command line interface for isquare.
 
@@ -19,7 +19,7 @@ Commands:
 ## build
 
 ```bash
-Usage: i2 build [OPTIONS] SCRIPT
+Usage: i2py build [OPTIONS] SCRIPT
 
   Build an docker image ready for isquare.
 
@@ -46,7 +46,7 @@ If you just want to test an image without rebuilding it completely you can just 
 following command:
 
 ```bash
-Usage: i2 test [OPTIONS] TAG
+Usage: i2py test [OPTIONS] TAG
 
   Verify that an docker image matches the isquare standard.
 
@@ -57,10 +57,10 @@ Options:
 
 ## infer
 
-The `i2 infer` command is used to send the data to your models running on isquare:
+The `i2py infer` command is used to send the data to your models running on isquare:
 
 ```bash
-Usage: i2 infer [OPTIONS] DATA
+Usage: i2py infer [OPTIONS] DATA
 
   Send data for inference.
 
