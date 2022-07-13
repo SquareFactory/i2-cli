@@ -1,5 +1,5 @@
 # Examples 
-This directory shows 3 sample integrations of the [ISquare](isquare.ai) client for image inference, with 3 levels of complexity:
+This directory shows 3 sample integrations of the [ISquare](http://isquare.ai) client for image inference, with 3 levels of complexity:
 - How to perform inference with an image
 - How to perform inference with a video
 - How to stream a camera to your model
