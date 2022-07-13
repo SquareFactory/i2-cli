@@ -22,7 +22,7 @@ The client allows you to build and test your model before uploading it to isquar
 you to test this feature, which we are sure will save you alot of time. For instance, try running:
 
 ```bash
-i2 build examples/tasks/mirror.py --cpu
+i2py build examples/tasks/mirror.py --cpu
 ```
 You should see following output:
 
