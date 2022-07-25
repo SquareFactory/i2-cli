@@ -25,6 +25,7 @@ setup(
         "imutils>=0.5.4",
         "msgpack>=1.0",
         "numpy>=1.19",
+        "nest-asyncio>=1.5",
         "rich>=10.13",
         "websockets>=8.1",
         "opencv-python==4.6.0.66",
