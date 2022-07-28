@@ -35,5 +35,5 @@ setup(
         [console_scripts]
         i2py=i2_client:i2_cli
     """,
-    python_requires=">=3.8",
+    python_requires=">=3.7",
 )
