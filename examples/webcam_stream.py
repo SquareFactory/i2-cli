@@ -73,7 +73,7 @@ async def main():
                 if not success:
                     raise RuntimeError(output)
 
-                concatenate_imgs = np.concatenate((frame, outputs[0]), axis=1)
+                concatenate_imgs = np.concatenate((frame, output), axis=1)
                 cv2.imshow("original / inference ", concatenate_imgs)
                 key = cv2.waitKey(1)
                 if key == 27:
