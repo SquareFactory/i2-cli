@@ -1,4 +1,4 @@
-"""Copyright (C) Alpine Intuition Sàrl - All Rights Reserved.
+"""Copyright (C) Square Factory SA - All Rights Reserved.
 
 This source code is protected under international copyright law. All rights
 reserved and protected by the copyright holders.
@@ -72,7 +72,9 @@ async def main():
                 success, output = outputs[0]
                 if not success:
                     raise RuntimeError(output)
-
+                h, w, _ = frame.shape
+                frame = cv2.resize(frame, (w * 2, h * 2))
+                output = cv2.resize(output, (w * 2, h * 2))
                 concatenate_imgs = np.concatenate((frame, output), axis=1)
                 cv2.imshow("original / inference ", concatenate_imgs)
                 key = cv2.waitKey(1)

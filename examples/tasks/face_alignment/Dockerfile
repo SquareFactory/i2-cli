@@ -1,4 +1,4 @@
-# Copyright (C) Alpine Intuition Sàrl - All Rights Reserved.
+# Copyright (C) Square Factory SA - All Rights Reserved.
 #
 # This source code is protected under international copyright law. All rights
 # reserved and protected by the copyright holders.
