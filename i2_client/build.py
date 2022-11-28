@@ -7,7 +7,6 @@ permission of the copyright holders. If you encounter this file and do not have
 permission, please contact the copyright holders and delete this file.
 """
 
-import json
 import logging
 import re
 import tempfile
@@ -91,12 +90,12 @@ class BuildManager:
         log.info(f"Building '{tag}'...")
 
         try:
-            generator = client.build(path=str(Path.cwd()), tag=tag, **additional_args)
+            generator = client.build(
+                path=str(Path.cwd()), tag=tag, decode=True, **additional_args
+            )
             output = generator.__next__()
         except docker.errors.APIError as error:
             raise docker.errors.BuildError(reason=error.explanation, build_log=error)
-
-        output = json.loads(output.decode())
 
         # Setup progress bar
         num_steps = int(output["stream"].split()[1].split("/")[-1])
@@ -111,7 +110,6 @@ class BuildManager:
             while True:
                 try:
                     output = generator.__next__()
-                    output = json.loads(output.decode())
 
                     if "stream" in output:
                         stream = re.sub(r" +", " ", output["stream"]).replace("\n", "")
