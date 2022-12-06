@@ -9,7 +9,7 @@ The complete documentation for ISquare can be found [here](http://docs.isquare.a
 
 ### From pip
 
-TODO when public.
+TODO 
 
 ### From source
 
