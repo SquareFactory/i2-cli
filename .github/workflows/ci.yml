@@ -9,7 +9,7 @@ on:
 jobs:
   check-code-formatting:
     name: Check code formatting
-    runs-on: self-hosted
+    runs-on: [self-hosted, isquare]
     steps:
       - uses: actions/checkout@v2
 
@@ -45,7 +45,7 @@ jobs:
 
   testing:
     name: Testing
-    runs-on: self-hosted
+    runs-on: [self-hosted, isquare]
     timeout-minutes: 60
 
     steps:
