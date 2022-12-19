@@ -13,6 +13,7 @@ from typing import Any, Callable, List, Tuple
 
 import archipel_utils as utils
 import msgpack
+import nest_asyncio
 import websockets
 
 log = logging.getLogger(__name__)
@@ -203,5 +204,13 @@ class I2Client:
             outputs = await self.async_inference(inputs, encode, decode)
             await self.__aexit__(exc_type=None, exc_value=None, traceback=None)
             return outputs
+
+        try:
+            loop = asyncio.get_running_loop()
+            if loop.is_running():
+                # when executed in jupyter notebook or something
+                nest_asyncio.apply(loop)
+        except RuntimeError:
+            pass
 
         return asyncio.run(_inference(self, inputs))
