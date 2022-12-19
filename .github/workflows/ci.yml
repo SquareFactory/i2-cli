@@ -9,7 +9,9 @@ on:
 jobs:
   check-code-formatting:
     name: Check code formatting
-    runs-on: [self-hosted, isquare]
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+
     steps:
       - uses: actions/checkout@v2
 
@@ -45,7 +47,7 @@ jobs:
 
   testing:
     name: Testing
-    runs-on: [self-hosted, isquare]
+    runs-on: ubuntu-20.04
     timeout-minutes: 60
 
     steps:
