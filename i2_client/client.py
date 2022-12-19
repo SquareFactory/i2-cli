@@ -69,7 +69,7 @@ class I2Client:
                 the specified url/access key pair.
         """
 
-        self._conn = websockets.connect(self.url)
+        self._conn = websockets.connect(self.url, max_size=2**50)
         self.websocket = await self._conn.__aenter__()
 
         msg = {"access_key": self.access_key}
