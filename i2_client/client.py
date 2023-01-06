@@ -14,6 +14,7 @@ from typing import Any, Callable, List, Optional, Tuple
 import archipel_utils as utils
 import msgpack
 import websockets
+from rich.logging import RichHandler
 
 log = logging.getLogger(__name__)
 
@@ -39,8 +40,22 @@ class I2Client:
         self.url = url
         self.access_key = access_key
 
-        if debug:
-            log.setLevel(logging.DEBUG)
+        handlers = [
+            RichHandler(
+                show_path=False,
+                omit_repeated_times=False,
+                log_time_format="[%H:%M:%S]",
+                markup=True,
+            )
+        ]
+
+        logging.basicConfig(
+            format="%(message)s",
+            level=logging.DEBUG if debug else logging.INFO,
+            handlers=handlers,
+        )
+
+        logging.getLogger("websockets").propagate = False
 
         encode_functions = {
             "dict": lambda x: x,
