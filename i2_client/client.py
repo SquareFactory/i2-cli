@@ -57,17 +57,13 @@ class I2Client:
 
         logging.getLogger("websockets").propagate = False
 
-        encode_functions = {
-            "dict": lambda x: x,
-            "numpy.ndarray": utils.serialize_array,
-        }
-        decode_functions = {
-            "dict": lambda x: x,
-            "numpy.ndarray": utils.deserialize_array,
-        }
         self.available_transforms = {
-            "encode": encode_functions,
-            "decode": decode_functions,
+            "encode": {
+                "ndarray": utils.serialize_array,
+            },
+            "decode": {
+                "ndarray": utils.deserialize_array,
+            },
         }
 
     async def __aenter__(self):
@@ -87,38 +83,22 @@ class I2Client:
         self._conn = websockets.connect(self.url, max_size=2**50)
         self.websocket = await self._conn.__aenter__()
 
-        msg = {"access_key": self.access_key}
+        msg = {"action": "Registration", "data": self.access_key}
+
+        msg["access_key"] = self.access_key
+        # TODO: keep for backcomp, remove when possible
+
         await self.websocket.send(msgpack.packb(msg))
+        log.debug("Registration sended, wait for response")
 
         msg = await self.websocket.recv()
         decoded_msg = msgpack.unpackb(msg)
-
-        if decoded_msg["status"] != "success":
+        if decoded_msg["status"].lower() != "success":
             raise ConnectionError(
                 f"Can not connect to Archipel: {decoded_msg['message']}"
             )
 
         log.info("Successfully connected to archipel!")
-
-        types = {
-            "input_type": decoded_msg["data"]["input_type"],
-            "output_type": decoded_msg["data"]["output_type"],
-        }
-
-        self.transforms = {}
-        for key, value in types.items():
-            arg = "encode" if key == "input_type" else "decode"
-
-            if value == "None" or value is None:
-                log.info(f"{key}: built-in")
-            elif value in self.available_transforms[arg]:
-                log.info(f"{key}: {value}")
-                self.transforms[arg] = self.available_transforms[arg][value]
-            else:
-                log.warning(
-                    f"Unknown {key} provided by task ({key}). You must provide "
-                    + f"one to the inference function with the '{arg}' argument."
-                )
 
         return self
 
@@ -163,36 +143,50 @@ class I2Client:
         if not isinstance(inputs, list):
             inputs = [inputs]
 
-        if encode is None and "encode" in self.transforms:
-            encode = self.transforms["encode"]
-        if decode is None and "decode" in self.transforms:
-            decode = self.transforms["decode"]
+        # determine if an encode function is needed
+
+        class_name = type(inputs[0]).__name__
+        if class_name in self.available_transforms["encode"] and encode is None:
+            log.debug(f"Available encode/decode function for {class_name}")
+            encode = self.available_transforms["encode"][class_name]
+            decode = self.available_transforms["decode"][class_name]
+
+        if encode is None:
+            encode = lambda x: x  # noqa: E731
+        if decode is None:
+            decode = lambda x: x  # noqa: E731
 
         outputs = []
         for inp in inputs:
-            if encode is not None:
-                try:
-                    inp = encode(inp)
-                except Exception as error:
-                    raise ValueError(f"Fail to encode input: {error}")
+            try:
+                inp = encode(inp)
+            except Exception as error:
+                ValueError(f"Fail to encode input: {error}")
 
             try:
-                msg = msgpack.packb({"data": inp})
+                msg = msgpack.packb({"action": "Inference", "data": inp})
             except Exception as error:
                 raise ValueError(f"Fail to msgpack input: {error}")
 
             await self.websocket.send(msg)
+            log.debug("Data sended, wait for response")
 
             msg = await self.websocket.recv()
-            success, error_msg, decoded_msg = utils.get_decoded_msg(msg, {"status"})
-            if not success:
-                raise RuntimeError(error_msg)
+            decoded_msg = msgpack.unpackb(msg)
 
-            if decoded_msg["status"] == "success":
-                inference = decoded_msg["data"]
-                if decode is not None:
-                    inference = decode(inference)
-                outputs.append((True, inference))
+            keys = set(decoded_msg.keys())
+            valid = keys.issubset(["status", "message", "data"])
+            backcomp_valid = keys.issubset(["status", "action", "message", "data"])
+            if not valid and not backcomp_valid:
+                raise ValueError("Invalid message received, missing fields")
+            log.debug("Got an valid response")
+
+            if decoded_msg["status"].lower() == "success":
+                try:
+                    inference = decode(decoded_msg["data"])
+                    outputs.append((True, inference))
+                except Exception as error:
+                    outputs.append((False, f"Fail to decode output: {error}"))
             else:
                 outputs.append((False, decoded_msg["message"]))
 
