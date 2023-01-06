@@ -9,6 +9,7 @@ permission, please contact the copyright holders and delete this file.
 
 import argparse
 import time
+import warnings
 
 import cv2
 import numpy as np
@@ -16,16 +17,28 @@ import numpy as np
 from i2_client import I2Client
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--url", type=str, help="", required=True)
+parser.add_argument("--url", type=str, required=True)
 parser.add_argument(
     "--access_uuid",
     type=str,
-    help="",
-    default="472f9457-072c-4a1a-800b-75ecdd6041e1",
+)
+parser.add_argument(
+    "--access-key",
+    type=str,
+)
+parser.add_argument(
+    "--debug",
+    action="store_true",
 )
 args = parser.parse_args()
 
-i2_client = I2Client(args.url, args.access_uuid)
+if args.access_uuid is not None:
+    warnings.warn("--access_uuid is deprecated, use --access-key", DeprecationWarning)
+    args.access_key = args.access_uuid
+if args.access_uuid is None and args.access_key is None:
+    raise ValueError("You have to provide an access key with --access-key")
+
+i2_client = I2Client(args.url, args.access_key, debug=args.debug)
 
 img = cv2.imread("test.jpg")
 if img is None:

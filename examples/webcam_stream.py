@@ -10,6 +10,7 @@ permission, please contact the copyright holders and delete this file.
 import argparse
 import asyncio
 import time
+import warnings
 
 import cv2
 import imutils
@@ -21,10 +22,20 @@ from i2_client import I2Client
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--url", type=str, help="", required=True)
-parser.add_argument("--access_uuid", type=str, help="", required=True)
-parser.add_argument("--frame_rate", type=int, help="", default=15)
-parser.add_argument("--resize_width", type=int, help="", default=None)
+parser.add_argument("--access_uuid", type=str, help="")  # DEPRACATED
+parser.add_argument("--frame_rate", type=int, help="", default=15)  # DEPRACATED
+parser.add_argument("--resize_width", type=int, help="", default=None)  # DEPRACATED
+parser.add_argument("--access-key", type=str, help="")
+parser.add_argument("--frame-rate", type=int, help="", default=15)
+parser.add_argument("--resize-width", type=int, help="", default=None)
+parser.add_argument("--debug", action="store_true")
 args = parser.parse_args()
+
+if args.access_uuid is not None:
+    warnings.warn("--access_uuid is deprecated, use --access-key", DeprecationWarning)
+    args.access_key = args.access_uuid
+if args.access_uuid is None and args.access_key is None:
+    raise ValueError("You have to provide an access key with --access-key")
 
 
 async def main():
@@ -33,7 +44,7 @@ async def main():
     cam = cv2.VideoCapture(0)
     prev = 0
 
-    async with I2Client(args.url, args.access_uuid) as client:
+    async with I2Client(args.url, args.access_key, args.debug) as client:
 
         spinner = Spinner("dots2", "connecting...")
         with Live(spinner, refresh_per_second=20):
