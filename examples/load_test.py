@@ -29,9 +29,7 @@ parser.add_argument("--inference_time", type=int, default=20)
 parser.add_argument(
     "--num_clients", help="number of simultaneous clients", type=int, default=50
 )
-parser.add_argument(
-    "--asyncio", type=int, help="launch using asyncio.", action="store_true"
-)
+parser.add_argument("--asyncio", help="launch using asyncio.", action="store_true")
 args = parser.parse_args()
 
 
