@@ -176,8 +176,8 @@ class BuildManager:
         self,
         script: Union[Path, str],
         dockerfile: Optional[Union[str, Path]] = None,
-        build_args: str = None,
-        docker_tag: str = None,
+        build_args: Optional[str] = None,
+        docker_tag: Optional[str] = None,
         cpu: bool = False,
         no_cache: bool = False,
     ):

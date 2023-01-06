@@ -9,7 +9,7 @@ permission, please contact the copyright holders and delete this file.
 
 import asyncio
 import logging
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 import archipel_utils as utils
 import msgpack
@@ -122,7 +122,10 @@ class I2Client:
         await self._conn.__aexit__(*args, **kwargs)
 
     async def async_inference(
-        self, inputs: Any, encode: Callable = None, decode: Callable = None
+        self,
+        inputs: Any,
+        encode: Optional[Callable] = None,
+        decode: Optional[Callable] = None,
     ) -> List[Tuple[bool, Any]]:
         """Send inference to archipel in async way.
 
@@ -181,7 +184,10 @@ class I2Client:
         return outputs
 
     def inference(
-        self, inputs: Any, encode: Callable = None, decode: Callable = None
+        self,
+        inputs: Any,
+        encode: Optional[Callable] = None,
+        decode: Optional[Callable] = None,
     ) -> List[Tuple[bool, Any]]:
         """Send inference to archipel in sync way.
 
