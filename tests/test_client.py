@@ -68,15 +68,10 @@ async def test_archipel_client_connection_async_success(setup):
             assert success
             assert np.equal(output, fake_data).all()
 
-    async def fake_cld(websocket, path):
+    async def fake_daemon(websocket, path):
         recv = await websocket.recv()
         drecv = msgpack.unpackb(recv)
-        data = {
-            "input_type": "numpy.ndarray",
-            "input_size": "variable",
-            "output_type": "numpy.ndarray",
-        }
-        msg = msgpack.packb({"status": "success", "data": data})
+        msg = msgpack.packb({"status": "Success"})
         await websocket.send(msg)
 
         # received encoded data
@@ -84,10 +79,10 @@ async def test_archipel_client_connection_async_success(setup):
         drecv = msgpack.unpackb(recv)
         assert "data" in drecv
 
-        msg = msgpack.packb({"status": "success", "data": drecv["data"]})
+        msg = msgpack.packb({"status": "Success", "data": drecv["data"]})
         await websocket.send(msg)
 
-    start_server = websockets.serve(fake_cld, host, port)
+    start_server = websockets.serve(fake_daemon, host, port)
 
     try:
         gather = asyncio.gather(fake_user(), start_server)
@@ -109,13 +104,13 @@ async def test_client_connect_async_invalid_access(setup):
             async with I2Client(url, "wrong:access_key"):
                 pass
 
-    async def fake_cld(websocket, path):
+    async def fake_daemon(websocket, path):
         recv = await websocket.recv()
         drecv = msgpack.unpackb(recv)
-        assert "access_key" in drecv
-        await websocket.send(msgpack.packb({"status": "fail", "message": "zbl"}))
+        assert "data" in drecv
+        await websocket.send(msgpack.packb({"status": "Fail", "message": "zbl"}))
 
-    start_server = websockets.serve(fake_cld, host, port)
+    start_server = websockets.serve(fake_daemon, host, port)
 
     try:
         gather = asyncio.gather(fake_user(), start_server)
@@ -138,16 +133,13 @@ async def test_archipel_client_connection_async_fail_msgpack(setup):
                 fake_data = np.random.randint(0, 255, (250, 250, 3))
                 await client.async_inference(fake_data)
 
-    async def fake_cld(websocket, path):
+    async def fake_daemon(websocket, path):
         await websocket.recv()
-        data = {
-            "input_type": "None",
-            "input_size": "variable",
-            "output_type": "None",
-        }
-        await websocket.send(msgpack.packb({"status": "success", "data": data}))
+        await websocket.send(msgpack.packb({"status": "Success"}))
+        await websocket.recv()
+        await websocket.send(b"coucou")
 
-    start_server = websockets.serve(fake_cld, host, port)
+    start_server = websockets.serve(fake_daemon, host, port)
 
     try:
         gather = asyncio.gather(fake_user(), start_server)
@@ -173,16 +165,11 @@ async def test_archipel_client_connection_async_fail_to_encode(setup):
                 fake_data = np.random.randint(0, 255, (250, 250, 3))
                 await client.async_inference(fake_data, encode=raise_error)
 
-    async def fake_cld(websocket, path):
+    async def fake_daemon(websocket, path):
         await websocket.recv()
-        data = {
-            "input_type": "zbl",
-            "input_size": "variable",
-            "output_type": "None",
-        }
-        await websocket.send(msgpack.packb({"status": "success", "data": data}))
+        await websocket.send(msgpack.packb({"status": "Success"}))
 
-    start_server = websockets.serve(fake_cld, host, port)
+    start_server = websockets.serve(fake_daemon, host, port)
 
     try:
         gather = asyncio.gather(fake_user(), start_server)
@@ -200,23 +187,17 @@ async def test_archipel_client_connection_async_got_invalid_message(setup):
 
     async def fake_user():
         await asyncio.sleep(0.1)
-        with pytest.raises(RuntimeError):
+        with pytest.raises(ValueError):
             async with I2Client(url, "good:access_key") as client:
                 await client.async_inference("zbl")
 
-    async def fake_cld(websocket, path):
+    async def fake_daemon(websocket, path):
         await websocket.recv()
-        data = {
-            "input_type": "None",
-            "input_size": "variable",
-            "output_type": "None",
-        }
-        await websocket.send(msgpack.packb({"status": "success", "data": data}))
-
+        await websocket.send(msgpack.packb({"status": "Success"}))
         await websocket.recv()
         await websocket.send(msgpack.packb({"zbl": "success"}))
 
-    start_server = websockets.serve(fake_cld, host, port)
+    start_server = websockets.serve(fake_daemon, host, port)
 
     try:
         gather = asyncio.gather(fake_user(), start_server)
@@ -243,19 +224,13 @@ async def test_archipel_client_connection_async_got_inference_fail(setup, mocker
             assert not success
             assert output == fake_msg
 
-    async def fake_cld(websocket, path):
+    async def fake_daemon(websocket, path):
         await websocket.recv()
-        data = {
-            "input_type": "None",
-            "input_size": "variable",
-            "output_type": "None",
-        }
-        await websocket.send(msgpack.packb({"status": "success", "data": data}))
-
+        await websocket.send(msgpack.packb({"status": "Success"}))
         await websocket.recv()
-        await websocket.send(msgpack.packb({"status": "fail", "message": fake_msg}))
+        await websocket.send(msgpack.packb({"status": "Fail", "message": fake_msg}))
 
-    start_server = websockets.serve(fake_cld, host, port)
+    start_server = websockets.serve(fake_daemon, host, port)
 
     try:
         gather = asyncio.gather(fake_user(), start_server)
