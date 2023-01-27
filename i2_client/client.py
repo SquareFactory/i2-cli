@@ -92,7 +92,7 @@ class I2Client:
         log.debug("Registration sended, wait for response")
 
         msg = await self.websocket.recv()
-        decoded_msg = msgpack.unpackb(msg)
+        decoded_msg = msgpack.unpackb(msg, strict_map_key=False)
         if decoded_msg["status"].lower() != "success":
             raise ConnectionError(
                 f"Can not connect to Archipel: {decoded_msg['message']}"
@@ -172,7 +172,7 @@ class I2Client:
             log.debug("Data sended, wait for response")
 
             msg = await self.websocket.recv()
-            decoded_msg = msgpack.unpackb(msg)
+            decoded_msg = msgpack.unpackb(msg, strict_map_key=False)
 
             keys = set(decoded_msg.keys())
             valid = keys.issubset(["status", "message", "data"])
