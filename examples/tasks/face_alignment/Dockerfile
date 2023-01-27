@@ -17,6 +17,7 @@ RUN apt-get update --fix-missing && \
 RUN pip install \
       Cython==0.29.21 \
       onnxruntime==1.6.0 \
+      numpy==1.23.2 \
       scipy==1.6.1 \
       torch==1.7.1 \
       torchvision==0.8.2
