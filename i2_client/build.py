@@ -9,6 +9,7 @@ permission, please contact the copyright holders and delete this file.
 
 import json
 import logging
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -86,7 +87,12 @@ class BuildManager:
 
         """
 
-        client = docker.APIClient(base_url="unix://var/run/docker.sock")
+        if os.name == "nt":
+            base_url = "npipe:////./pipe/docker_engine"
+        else:
+            base_url = "unix://var/run/docker.sock"
+
+        client = docker.APIClient(base_url=base_url)
 
         log.info(f"Building '{tag}'...")
 
