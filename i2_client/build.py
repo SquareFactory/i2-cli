@@ -90,13 +90,21 @@ class BuildManager:
 
         log.info(f"Building '{tag}'...")
 
+        def decode_logs(logs):
+            logs = logs.decode()
+            # remove extraline if needed
+            logs = logs.split("\n")[0]
+            # for osx compability
+            logs = logs.replace("“", '"').replace("”", '"')
+            return json.loads(logs)
+
         try:
             generator = client.build(path=str(Path.cwd()), tag=tag, **additional_args)
             output = generator.__next__()
         except docker.errors.APIError as error:
             raise docker.errors.BuildError(reason=error.explanation, build_log=error)
 
-        output = json.loads(output.decode())
+        output = decode_logs(output)
 
         # Setup progress bar
         num_steps = int(output["stream"].split()[1].split("/")[-1])
@@ -111,7 +119,7 @@ class BuildManager:
             while True:
                 try:
                     output = generator.__next__()
-                    output = json.loads(output.decode())
+                    output = decode_logs(output)
 
                     if "stream" in output:
                         stream = re.sub(r" +", " ", output["stream"]).replace("\n", "")
