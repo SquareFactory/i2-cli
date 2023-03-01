@@ -66,12 +66,18 @@ async def test_archipel_client_connection_async_success(setup):
             assert len(outputs) == 1
             success, output = outputs[0]
             assert success
+            print(output, fake_data)
             assert np.equal(output, fake_data).all()
 
     async def fake_daemon(websocket, path):
         recv = await websocket.recv()
         drecv = msgpack.unpackb(recv)
-        msg = msgpack.packb({"status": "Success"})
+        msg = msgpack.packb(
+            {
+                "status": "Success",
+                "data": {"input_type": "numpy.ndarray", "output_type": "numpy.ndarray"},
+            }
+        )
         await websocket.send(msg)
 
         # received encoded data
@@ -135,7 +141,13 @@ async def test_archipel_client_connection_async_fail_msgpack(setup):
 
     async def fake_daemon(websocket, path):
         await websocket.recv()
-        await websocket.send(msgpack.packb({"status": "Success"}))
+        msg = msgpack.packb(
+            {
+                "status": "Success",
+                "data": {"input_type": "numpy.ndarray", "output_type": "n/a"},
+            }
+        )
+        await websocket.send(msg)
         await websocket.recv()
         await websocket.send(b"coucou")
 
@@ -167,7 +179,13 @@ async def test_archipel_client_connection_async_fail_to_encode(setup):
 
     async def fake_daemon(websocket, path):
         await websocket.recv()
-        await websocket.send(msgpack.packb({"status": "Success"}))
+        msg = msgpack.packb(
+            {
+                "status": "Success",
+                "data": {"input_type": "numpy.ndarray", "output_type": "n/a"},
+            }
+        )
+        await websocket.send(msg)
 
     start_server = websockets.serve(fake_daemon, host, port)
 
@@ -193,7 +211,13 @@ async def test_archipel_client_connection_async_got_invalid_message(setup):
 
     async def fake_daemon(websocket, path):
         await websocket.recv()
-        await websocket.send(msgpack.packb({"status": "Success"}))
+        msg = msgpack.packb(
+            {
+                "status": "Success",
+                "data": {"input_type": "numpy.ndarray", "output_type": "n/a"},
+            }
+        )
+        await websocket.send(msg)
         await websocket.recv()
         await websocket.send(msgpack.packb({"zbl": "success"}))
 
@@ -226,7 +250,13 @@ async def test_archipel_client_connection_async_got_inference_fail(setup, mocker
 
     async def fake_daemon(websocket, path):
         await websocket.recv()
-        await websocket.send(msgpack.packb({"status": "Success"}))
+        msg = msgpack.packb(
+            {
+                "status": "Success",
+                "data": {"input_type": "numpy.ndarray", "output_type": "n/a"},
+            }
+        )
+        await websocket.send(msg)
         await websocket.recv()
         await websocket.send(msgpack.packb({"status": "Fail", "message": fake_msg}))
 
