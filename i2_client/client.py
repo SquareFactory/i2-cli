@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 class I2Client:
     """A class to manage the connection to a worker and inferences."""
 
-    def __init__(self, url: str, access_key: str, debug: bool = True):
+    def __init__(self, url: str, access_key: str, debug: bool = False):
         """Initialize the isquare client.
 
         Args:
@@ -51,13 +51,13 @@ class I2Client:
 
         logging.basicConfig(
             format="%(message)s",
-            level=logging.DEBUG if debug else logging.INFO,
+            level=logging.DEBUG if debug else logging.WARN,
             handlers=handlers,
         )
 
         logging.getLogger("websockets").propagate = False
 
-        self.available_transforms = {
+        self.transforms = {
             "encode": {
                 "ndarray": utils.serialize_array,
             },
@@ -93,12 +93,31 @@ class I2Client:
 
         msg = await self.websocket.recv()
         decoded_msg = msgpack.unpackb(msg, strict_map_key=False)
+
         if decoded_msg["status"].lower() != "success":
             raise ConnectionError(
                 f"Can not connect to Archipel: {decoded_msg['message']}"
             )
 
-        log.info("Successfully connected to archipel!")
+        if "data" in decoded_msg:
+            input_type = decoded_msg["data"]["input_type"]
+            input_type = input_type.replace("numpy.", "")
+            output_type = decoded_msg["data"]["output_type"]
+            output_type = output_type.replace("numpy.", "")
+            # TODO remove when archipel rust version is used everywhere
+        elif "workload_typing" in decoded_msg:
+            input_type = decoded_msg["workload_typing"]["input"]
+            output_type = decoded_msg["workload_typing"]["output"]
+        else:
+            raise ValueError("Missing types in archipel response")
+
+        self.encode = self.transforms["encode"].get(input_type, lambda x: x)
+        self.decode = self.transforms["decode"].get(output_type, lambda x: x)
+
+        log.info(
+            "Successfully connected to archipel! "
+            + f"input_type={input_type}, output_type={output_type})"
+        )
 
         return self
 
@@ -143,18 +162,8 @@ class I2Client:
         if not isinstance(inputs, list):
             inputs = [inputs]
 
-        # determine if an encode function is needed
-
-        class_name = type(inputs[0]).__name__
-        if class_name in self.available_transforms["encode"] and encode is None:
-            log.debug(f"Available encode/decode function for {class_name}")
-            encode = self.available_transforms["encode"][class_name]
-            decode = self.available_transforms["decode"][class_name]
-
-        if encode is None:
-            encode = lambda x: x  # noqa: E731
-        if decode is None:
-            decode = lambda x: x  # noqa: E731
+        encode = self.encode if encode is None else encode
+        decode = self.decode if decode is None else decode
 
         outputs = []
         for inp in inputs:
