@@ -8,6 +8,7 @@ permission, please contact the copyright holders and delete this file.
 """
 
 import asyncio
+import json
 import logging
 from typing import Any, Callable, List, Optional, Tuple
 
@@ -58,12 +59,8 @@ class I2Client:
         logging.getLogger("websockets").propagate = False
 
         self.transforms = {
-            "encode": {
-                "ndarray": utils.serialize_array,
-            },
-            "decode": {
-                "ndarray": utils.deserialize_array,
-            },
+            "encode": {"ndarray": utils.serialize_array, "dict": json.dumps},
+            "decode": {"ndarray": utils.deserialize_array, "dict": json.loads},
         }
 
     async def __aenter__(self):
