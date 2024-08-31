@@ -30,7 +30,7 @@ setup(
         "pytest-cov>=2.11",
         "pytest-asyncio>=0.14",
         "websockets>=8.1",
-        "opencv-python==4.6.0.66",
+        "opencv-python==4.8.1.78",
     ],
     packages=find_packages(),
     entry_points="""
